@@ -45,13 +45,13 @@ Stream your first media
 
 ## HTTP (default)
 
-The HTTP way is not secured. While you're streaming to Kodi (or XBMC), the directory where is the media can be accessed by other computer in your network.
+The HTTP way is not secured. While you're streaming to Kodi (or XBMC), the media can be accessed by other computer in your network. That's not a big problem while you're not streaming important information (restricted video). 
 
 This solution need to open port on your firewall. 
 
-By default, idok opens 8080 port, but you can specify other port.
+By default, idok opens 8080 port (http-alternative), but you can specify other port using "-port" option.
 
-To open firewall port on you linux installation:
+At first, you must be sure that the port is opened. To open firewall port on you linux installation:
 
 	firewall-cmd --add-port=8080/tcp
 
@@ -70,9 +70,15 @@ If you've opened other port, you can set it. For example for port 1234:
 
 ## SSH
 
-The SSH way is the easier and more secured way. You don't have to open port on your computer and only the Kodi instance will be able to access your content. This is the default mode
+The SSH way is the easier and more secured way. Easier because you don't have to open port on your computer and only the Kodi instance will be able to access your content.
 
-Unfortunately, raspbmc has a little problem with ssh server. But it's not very hard to fix.
+But... Unfortunately, raspbmc has a little problem with ssh server. But it's not very hard to fix but you'll had to do some configuration...
+
+At first, the standard information that I must write:
+
+**I will not be responsible about malfunction, bad usage or error. Follow instruction with caution and please make a backup before doing anything.**
+
+Now that you know that, we can continue.
 
 We will replace dropbear by openssh-server.
 
@@ -80,6 +86,8 @@ We will replace dropbear by openssh-server.
 	$ sudo nano /etc/default/dropbear
 
 Change DROPBEAR_PORT value to "2222" then save by pressing CTRL+X then Y
+
+Changing port before removing the dropbear server is secured. If openssh-server installation failed, you will be able to connect to RaspBMC using "-p 2222" with your ssh command line.
 
 Now, install openssh-server:
 
