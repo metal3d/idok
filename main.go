@@ -1,0 +1,241 @@
+package main
+
+import (
+	"bytes"
+	"code.google.com/p/go.crypto/ssh"
+	"encoding/json"
+	"errors"
+	"flag"
+	"fmt"
+	"io/ioutil"
+	"log"
+	"net"
+	"net/http"
+	"net/url"
+	"os"
+	"os/signal"
+	"path/filepath"
+	"syscall"
+	"time"
+)
+
+var PORT string
+var HOST string
+var LISTEN string
+var RASPIP string
+
+// message to send to stop media
+const stopbody = `{"id":1,"jsonrpc":"2.0","method":"Player.Stop","params":{"playerid": %d}}`
+
+// get player id
+const getplayer = `{"id":1, "jsonrpc":"2.0","method":"Player.GetActivePlayers"}`
+
+// the message to lauch local media
+const body = `{
+	"id":1,"jsonrpc":"2.0",
+	"method":"Player.Open",
+	"params": {
+		"item": {
+		   "file": "%s"
+		 }
+	 }
+ }`
+
+// response of get players
+type itemresp struct {
+	Id      int
+	Jsonrpc string
+	Result  []map[string]interface{}
+}
+
+// return active player from XBMC
+func getActivePlayer() *itemresp {
+	r, _ := http.Post(HOST, "application/json", bytes.NewBufferString(getplayer))
+	response, _ := ioutil.ReadAll(r.Body)
+	resp := &itemresp{}
+	resp.Result = make([]map[string]interface{}, 0)
+	json.Unmarshal(response, resp)
+	return resp
+}
+
+// test if media is playing, if not then quit
+func checkPlaying() {
+
+	tick := time.Tick(1 * time.Second)
+	for _ = range tick {
+		resp := getActivePlayer()
+		if len(resp.Result) == 0 {
+			os.Exit(0)
+		}
+	}
+
+}
+
+// when quiting (CTRL+C for example) - tell to XBMC to stop
+func onQuit() {
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, syscall.SIGTERM, syscall.SIGINT)
+
+	select {
+	case <-c:
+		fmt.Println("Quiting")
+		resp := getActivePlayer()
+		var playerid int
+		for _, result := range resp.Result {
+			for key, val := range result {
+				if key == "playerid" {
+					playerid = int(val.(float64))
+				}
+			}
+		}
+
+		http.Post(HOST, "application/json", bytes.NewBufferString(fmt.Sprintf(stopbody, playerid)))
+		os.Exit(0)
+	}
+}
+
+// begin to locally listen http to serve media
+func send(host, file string, port int) {
+
+	u := url.URL{Path: file}
+	file = u.String()
+	//_body := fmt.Sprintf(body, "http://"+LISTEN+":"+PORT+"/"+file)
+	addr := fmt.Sprintf("http://%s:%d/%s", host, port, file)
+	_body := fmt.Sprintf(body, addr)
+
+	r, err := http.Post(HOST, "application/json", bytes.NewBufferString(_body))
+	if err != nil {
+		log.Fatal(err)
+	}
+	response, _ := ioutil.ReadAll(r.Body)
+	log.Println(string(response))
+}
+
+func getLocalInterfaceIP() (string, error) {
+	ips, _ := net.LookupIP(RASPIP)
+	for _, ip := range ips {
+		mask := ip.DefaultMask()
+		ifaces, err := net.Interfaces()
+		if err != nil {
+			log.Fatalf("Error while checking you interfaces: %v", err)
+		}
+		log.Println(ifaces)
+		for _, iface := range ifaces {
+			if iface.Flags&net.FlagLoopback != 0 {
+				continue
+			}
+
+			addrs, _ := iface.Addrs()
+			for _, addr := range addrs {
+				switch v := addr.(type) {
+				case *net.IPNet:
+					if v.Mask.String() == mask.String() {
+						return v.IP.String(), nil
+					}
+				}
+
+			}
+		}
+	}
+	return "", errors.New("Unable to get local ip")
+}
+
+func httpserve(file, dir string, port int) {
+
+	localip, err := getLocalInterfaceIP()
+	log.Println(localip)
+	if err != nil {
+		log.Fatal(err)
+	}
+	http.Handle("/", http.FileServer(http.Dir(dir)))
+
+	// send xbmc the file query
+	go send(localip, file, port)
+
+	// handle CTRL+C to stop
+	go onQuit()
+
+	// and wait media end
+	go checkPlaying()
+
+	http.ListenAndServe(fmt.Sprintf("0.0.0.0:%d", port), nil)
+}
+
+func sshforward(config *ssh.ClientConfig, file, dir string) {
+
+	// Setup sshClientConn (type *ssh.ClientConn)
+	sshClientConn, err := ssh.Dial("tcp", RASPIP+":22", config)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Setup sshConn (type net.Conn)
+	sshConn, err := sshClientConn.Listen("tcp", "127.0.0.1:0")
+	addr := sshConn.Addr()
+	port := addr.(*net.TCPAddr).Port
+	log.Println("Listening port on raspberry: ", port)
+
+	// send xbmc the file query
+	go send("localhost", file, port)
+	// handle CTRL+C to stop
+	go onQuit()
+	// and wait media end
+	go checkPlaying()
+
+	// now serve file
+	http.Serve(sshConn, http.FileServer(http.Dir(dir)))
+}
+
+func main() {
+
+	// flags
+	xbmcaddr := flag.String("xbmc", "", "xbmc ip (raspbmc address, ip or hostname)")
+	username := flag.String("login", "", "jsonrpc login (configured in xbmc settings)")
+	password := flag.String("password", "", "jsonrpc password (configured in xbmc settings)")
+	viassh := flag.Bool("ssh", false, "Use SSH Tunnelling (need ssh user and password)")
+	port := flag.Int("port", 8080, "local port (ignored if you use ssh option)")
+	sshuser := flag.String("sshuser", "pi", "ssh login")
+	sshpassword := flag.String("sshpass", "raspberry", "ssh password")
+
+	flag.Parse()
+
+	if *xbmcaddr == "" {
+		fmt.Println("You must provide the xbmc server address")
+		os.Exit(1)
+	}
+
+	HOST = *xbmcaddr
+	RASPIP = *xbmcaddr
+
+	// XBMC can be configured to have username/password
+	if *username != "" {
+		HOST = *username + ":" + *password + "@" + HOST
+	}
+	HOST = "http://" + HOST + "/jsonrpc"
+
+	if len(flag.Args()) < 1 {
+		fmt.Println("You must provide a file to serve")
+		os.Exit(2)
+	}
+
+	// find the good path
+	toserve := flag.Arg(0)
+	dir := "."
+	toserve, _ = filepath.Abs(toserve)
+	file := filepath.Base(toserve)
+	dir = filepath.Dir(toserve)
+
+	if *viassh {
+		config := &ssh.ClientConfig{
+			User: *sshuser,
+			Auth: []ssh.AuthMethod{
+				ssh.Password(*sshpassword),
+			},
+		}
+
+		// serve !
+		sshforward(config, file, dir)
+	} else {
+		httpserve(file, dir, *port)
+	}
+}
