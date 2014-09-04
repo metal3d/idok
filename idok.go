@@ -23,6 +23,7 @@ var PORT string
 var HOST string
 var LISTEN string
 var RASPIP string
+var SSHPORT int
 
 // message to send to stop media
 const stopbody = `{"id":1,"jsonrpc":"2.0","method":"Player.Stop","params":{"playerid": %d}}`
@@ -61,7 +62,7 @@ func getActivePlayer() *itemresp {
 // test if media is playing, if not then quit
 func checkPlaying() {
 
-	tick := time.Tick(1 * time.Second)
+	tick := time.Tick(3 * time.Second)
 	for _ = range tick {
 		resp := getActivePlayer()
 		if len(resp.Result) == 0 {
@@ -147,7 +148,12 @@ func httpserve(file, dir string, port int) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	http.Handle("/", http.FileServer(http.Dir(dir)))
+
+	// handle file http response
+	fullpath := filepath.Join(dir, file)
+	http.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, fullpath)
+	}))
 
 	// send xbmc the file query
 	go send(localip, file, port)
@@ -164,7 +170,7 @@ func httpserve(file, dir string, port int) {
 func sshforward(config *ssh.ClientConfig, file, dir string) {
 
 	// Setup sshClientConn (type *ssh.ClientConn)
-	sshClientConn, err := ssh.Dial("tcp", RASPIP+":22", config)
+	sshClientConn, err := ssh.Dial("tcp", fmt.Sprintf("%s:%d", RASPIP, SSHPORT), config)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -183,7 +189,10 @@ func sshforward(config *ssh.ClientConfig, file, dir string) {
 	go checkPlaying()
 
 	// now serve file
-	http.Serve(sshConn, http.FileServer(http.Dir(dir)))
+	fullpath := filepath.Join(dir, file)
+	http.Serve(sshConn, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, fullpath)
+	}))
 }
 
 func main() {
@@ -196,6 +205,7 @@ func main() {
 	port := flag.Int("port", 8080, "local port (ignored if you use ssh option)")
 	sshuser := flag.String("sshuser", "pi", "ssh login")
 	sshpassword := flag.String("sshpass", "raspberry", "ssh password")
+	sshport := flag.Int("sshport", 22, "target ssh port")
 
 	flag.Parse()
 
@@ -206,6 +216,7 @@ func main() {
 
 	HOST = *xbmcaddr
 	RASPIP = *xbmcaddr
+	SSHPORT = *sshport
 
 	// XBMC can be configured to have username/password
 	if *username != "" {
