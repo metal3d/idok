@@ -189,7 +189,7 @@ func sshforward(config *ssh.ClientConfig, file, dir string) {
 func main() {
 
 	// flags
-	xbmcaddr := flag.String("xbmc", "", "xbmc ip (raspbmc address, ip or hostname)")
+	xbmcaddr := flag.String("target", "", "xbmc/kodi ip (raspbmc address, ip or hostname)")
 	username := flag.String("login", "", "jsonrpc login (configured in xbmc settings)")
 	password := flag.String("password", "", "jsonrpc password (configured in xbmc settings)")
 	viassh := flag.Bool("ssh", false, "Use SSH Tunnelling (need ssh user and password)")
