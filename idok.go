@@ -112,15 +112,16 @@ func send(host, file string, port int) {
 	log.Println(string(response))
 }
 
+// return local ip that matches kodi network
+// ignoring loopback and other net interfaces
 func getLocalInterfaceIP() (string, error) {
 	ips, _ := net.LookupIP(RASPIP)
+	ifaces, err := net.Interfaces()
+	if err != nil {
+		log.Fatalf("Error while checking you interfaces: %v", err)
+	}
 	for _, ip := range ips {
 		mask := ip.DefaultMask()
-		ifaces, err := net.Interfaces()
-		if err != nil {
-			log.Fatalf("Error while checking you interfaces: %v", err)
-		}
-		log.Println(ifaces)
 		for _, iface := range ifaces {
 			if iface.Flags&net.FlagLoopback != 0 {
 				continue
@@ -141,6 +142,8 @@ func getLocalInterfaceIP() (string, error) {
 	return "", errors.New("Unable to get local ip")
 }
 
+// open a port locally and tell to kodi to stream
+// from this port
 func httpserve(file, dir string, port int) {
 
 	localip, err := getLocalInterfaceIP()
@@ -167,6 +170,8 @@ func httpserve(file, dir string, port int) {
 	http.ListenAndServe(fmt.Sprintf("0.0.0.0:%d", port), nil)
 }
 
+// Dig tunnel to kodi, open a port and bind socket to
+// the local http server
 func sshforward(config *ssh.ClientConfig, file, dir string) {
 
 	// Setup sshClientConn (type *ssh.ClientConn)
