@@ -49,14 +49,13 @@ The HTTP way is not secured. While you're streaming to Kodi (or XBMC), the direc
 
 This solution need to open port on your firewall. 
 
-By default, idok open 8080 port, but you can specify other port.
+By default, idok opens 8080 port, but you can specify other port.
 
 To open firewall port on you linux installation:
 
 	firewall-cmd --add-port=8080/tcp
 
-When you will reload firewall, or restart computer, the port will be closed. If you want to keep that port open:
-
+When you will reload firewall, or restart computer, the port will be closed. If you want to keep that port opened:
 
 	firewall-cmd --add-port=8080/tcp --permanent
 
