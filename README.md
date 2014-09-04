@@ -17,7 +17,7 @@ You can clone repository and compile source code yourself:
 
 	git clone http://git.develipsum.com/metal3d/idok.git
 	cd idok
-	go build -o idok main.go
+	go build idok.go
 
 Then you can put binary in your PATH:
 
