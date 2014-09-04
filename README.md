@@ -13,6 +13,21 @@ Idok has got two modes:
 Installation
 ============
 
+## Install distribution
+
+You can install idok binarie for your user:
+
+	mkdir -p ~/.local/bin
+	wget http://dists.metal3d.org/idok -O ~/.local/bin/idok
+
+Check that ~/.local/bin is in your PATH. Then try to call:
+
+	idok -h
+
+**Warning: idik is built for 64bit computers**
+
+## Install from source
+
 You can clone repository and compile source code yourself:
 
 	git clone http://git.develipsum.com/metal3d/idok.git
@@ -24,24 +39,25 @@ Then you can put binary in your PATH:
 	mkdir -p ~/.local/bin
 	cp idok ~/.local/bin
 
+
+## Options
+
 You can now ask some help:
 
 	idok -h
 	Usage of idok:
-	  -login="": jsonrpc login (configured in xbmc settings)
-	  -password="": jsonrpc password (configured in xbmc settings)
-	  -port=8080: local port (ignored if you use ssh option)
-	  -ssh=false: Use SSH Tunnelling (need ssh user and password)
-	  -sshpass="raspberry": ssh password
-	  -sshuser="pi": ssh login
-	  -target="": xbmc/kodi ip (raspbmc address, ip or hostname)
+	 -login="": jsonrpc login (configured in xbmc settings)
+	 -password="": jsonrpc password (configured in xbmc settings)
+	 -port=8080: local port (ignored if you use ssh option)
+	 -ssh=false: Use SSH Tunnelling (need ssh user and password)
+	 -sshpass="raspberry": ssh password
+	 -sshport=22: target ssh port
+	 -sshuser="pi": ssh login
+	 -target="": xbmc/kodi ip (raspbmc address, ip or hostname)
 
-
-There is a build for x86_64 cpu (if you're computer is not too old, this is ok) that is available (TODO: give the url)
 
 Stream your first media
 =======================
-
 
 ## HTTP (default)
 
@@ -119,14 +135,13 @@ There are other options that may be usefull:
 * -ssh : If set, idok will dig ssh tunnel to stream content
 * -sshuser : if you don't user "pi" user
 * -sshpass : if you changed standard password of "pi" user
+* -sshport : if you changed standard ssh port or to use other ssh server (default is 22)
 * -port : local port for media stream if you don't use ssh tunneling, default is 8080
 
 TODO
 ====
 
 I should ask dropbear maintainer why the tunneling won't work. Installing openssh-server on raspbmc can be complicated for some users.
-
-Add ssh port option.
 
 Add kodi/xbmc port option (some users changed the default 80) 
 
