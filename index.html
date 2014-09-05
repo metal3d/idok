@@ -45,6 +45,25 @@
 </ul><h1>
 <a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h1>
 
+<h2>
+<a name="install-distribution" class="anchor" href="#install-distribution"><span class="octicon octicon-link"></span></a>Install distribution</h2>
+
+<p>You can install idok binarie for your user:</p>
+
+<pre><code>mkdir -p ~/.local/bin
+wget http://dists.metal3d.org/idok -O ~/.local/bin/idok
+</code></pre>
+
+<p>Check that ~/.local/bin is in your PATH. Then try to call:</p>
+
+<pre><code>idok -h
+</code></pre>
+
+<p><strong>Warning: idik is built for 64bit computers</strong></p>
+
+<h2>
+<a name="install-from-source" class="anchor" href="#install-from-source"><span class="octicon octicon-link"></span></a>Install from source</h2>
+
 <p>You can clone repository and compile source code yourself:</p>
 
 <pre><code>git clone http://git.develipsum.com/metal3d/idok.git
@@ -58,20 +77,22 @@ go build idok.go
 cp idok ~/.local/bin
 </code></pre>
 
+<h2>
+<a name="options" class="anchor" href="#options"><span class="octicon octicon-link"></span></a>Options</h2>
+
 <p>You can now ask some help:</p>
 
 <pre><code>idok -h
 Usage of idok:
-  -login="": jsonrpc login (configured in xbmc settings)
-  -password="": jsonrpc password (configured in xbmc settings)
-  -port=8080: local port (ignored if you use ssh option)
-  -ssh=false: Use SSH Tunnelling (need ssh user and password)
-  -sshpass="raspberry": ssh password
-  -sshuser="pi": ssh login
-  -target="": xbmc/kodi ip (raspbmc address, ip or hostname)
+ -login="": jsonrpc login (configured in xbmc settings)
+ -password="": jsonrpc password (configured in xbmc settings)
+ -port=8080: local port (ignored if you use ssh option)
+ -ssh=false: Use SSH Tunnelling (need ssh user and password)
+ -sshpass="raspberry": ssh password
+ -sshport=22: target ssh port
+ -sshuser="pi": ssh login
+ -target="": xbmc/kodi ip (raspbmc address, ip or hostname)
 </code></pre>
-
-<p>There is a build for x86_64 cpu (if you're computer is not too old, this is ok) that is available (TODO: give the url)</p>
 
 <h1>
 <a name="stream-your-first-media" class="anchor" href="#stream-your-first-media"><span class="octicon octicon-link"></span></a>Stream your first media</h1>
@@ -79,13 +100,13 @@ Usage of idok:
 <h2>
 <a name="http-default" class="anchor" href="#http-default"><span class="octicon octicon-link"></span></a>HTTP (default)</h2>
 
-<p>The HTTP way is not secured. While you're streaming to Kodi (or XBMC), the directory where is the media can be accessed by other computer in your network.</p>
+<p>The HTTP way is not secured. While you're streaming to Kodi (or XBMC), the media can be accessed by other computer in your network. That's not a big problem while you're not streaming important information (restricted video). </p>
 
 <p>This solution need to open port on your firewall. </p>
 
-<p>By default, idok opens 8080 port, but you can specify other port.</p>
+<p>By default, idok opens 8080 port (http-alternative), but you can specify other port using "-port" option.</p>
 
-<p>To open firewall port on you linux installation:</p>
+<p>At first, you must be sure that the port is opened. To open firewall port on you linux installation:</p>
 
 <pre><code>firewall-cmd --add-port=8080/tcp
 </code></pre>
@@ -108,9 +129,15 @@ Usage of idok:
 <h2>
 <a name="ssh" class="anchor" href="#ssh"><span class="octicon octicon-link"></span></a>SSH</h2>
 
-<p>The SSH way is the easier and more secured way. You don't have to open port on your computer and only the Kodi instance will be able to access your content. This is the default mode</p>
+<p>The SSH way is the easier and more secured way. Easier because you don't have to open port on your computer and only the Kodi instance will be able to access your content.</p>
 
-<p>Unfortunately, raspbmc has a little problem with ssh server. But it's not very hard to fix.</p>
+<p>But... Unfortunately, raspbmc has a little problem with ssh server. But it's not very hard to fix but you'll had to do some configuration...</p>
+
+<p>At first, the standard information that I must write:</p>
+
+<p><strong>I will not be responsible about malfunction, bad usage or error. Follow instruction with caution and please make a backup before doing anything.</strong></p>
+
+<p>Now that you know that, we can continue.</p>
 
 <p>We will replace dropbear by openssh-server.</p>
 
@@ -119,6 +146,8 @@ $ sudo nano /etc/default/dropbear
 </code></pre>
 
 <p>Change DROPBEAR_PORT value to "2222" then save by pressing CTRL+X then Y</p>
+
+<p>Changing port before removing the dropbear server is secured. If openssh-server installation failed, you will be able to connect to RaspBMC using "-p 2222" with your ssh command line.</p>
 
 <p>Now, install openssh-server:</p>
 
@@ -143,7 +172,7 @@ $ sudo apt-get -y openssh-server
 <p>Pressing CTRL+C should stop media stream and exit program.</p>
 
 <h1>
-<a name="options" class="anchor" href="#options"><span class="octicon octicon-link"></span></a>Options</h1>
+<a name="options-1" class="anchor" href="#options-1"><span class="octicon octicon-link"></span></a>Options</h1>
 
 <p>There are other options that may be usefull:</p>
 
@@ -154,13 +183,12 @@ $ sudo apt-get -y openssh-server
 <li>-ssh : If set, idok will dig ssh tunnel to stream content</li>
 <li>-sshuser : if you don't user "pi" user</li>
 <li>-sshpass : if you changed standard password of "pi" user</li>
+<li>-sshport : if you changed standard ssh port or to use other ssh server (default is 22)</li>
 <li>-port : local port for media stream if you don't use ssh tunneling, default is 8080</li>
 </ul><h1>
 <a name="todo" class="anchor" href="#todo"><span class="octicon octicon-link"></span></a>TODO</h1>
 
 <p>I should ask dropbear maintainer why the tunneling won't work. Installing openssh-server on raspbmc can be complicated for some users.</p>
-
-<p>Add ssh port option.</p>
 
 <p>Add kodi/xbmc port option (some users changed the default 80) </p>
       </section>
