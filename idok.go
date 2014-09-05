@@ -15,6 +15,7 @@ import (
 	"net/url"
 	"os"
 	"os/signal"
+	"os/user"
 	"path/filepath"
 	"syscall"
 	"time"
@@ -209,6 +210,26 @@ func sshforward(config *ssh.ClientConfig, file, dir string) {
 	}))
 }
 
+func parseSSHKeys() ssh.Signer {
+	u, _ := user.Current()
+	home := u.HomeDir
+	id_rsa_priv := filepath.Join(home, ".ssh", "id_rsa")
+	content, err := ioutil.ReadFile(id_rsa_priv)
+	if err != nil {
+		log.Println("no id_rsa key found")
+		return nil
+	}
+
+	private, err := ssh.ParsePrivateKey(content)
+	if err != nil {
+		log.Println("Unable to parse private key")
+		return nil
+	}
+	fmt.Println(private)
+	return private
+
+}
+
 func main() {
 
 	// flags
@@ -218,7 +239,7 @@ func main() {
 	viassh := flag.Bool("ssh", false, "Use SSH Tunnelling (need ssh user and password)")
 	port := flag.Int("port", 8080, "local port (ignored if you use ssh option)")
 	sshuser := flag.String("sshuser", "pi", "ssh login")
-	sshpassword := flag.String("sshpass", "raspberry", "ssh password")
+	sshpassword := flag.String("sshpass", "", "ssh password")
 	sshport := flag.Int("sshport", 22, "target ssh port")
 
 	flag.Parse()
@@ -254,6 +275,7 @@ func main() {
 		config := &ssh.ClientConfig{
 			User: *sshuser,
 			Auth: []ssh.AuthMethod{
+				ssh.PublicKeys(parseSSHKeys()),
 				ssh.Password(*sshpassword),
 			},
 		}
