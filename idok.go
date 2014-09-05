@@ -27,14 +27,17 @@ var LISTEN string
 var RASPIP string
 var SSHPORT int
 
-// message to send to stop media
-const stopbody = `{"id":1,"jsonrpc":"2.0","method":"Player.Stop","params":{"playerid": %d}}`
+const (
+	VERSION = "0.2.2"
 
-// get player id
-const getplayer = `{"id":1, "jsonrpc":"2.0","method":"Player.GetActivePlayers"}`
+	// message to send to stop media
+	stopbody = `{"id":1,"jsonrpc":"2.0","method":"Player.Stop","params":{"playerid": %d}}`
 
-// the message to lauch local media
-const body = `{
+	// get player id
+	getplayer = `{"id":1, "jsonrpc":"2.0","method":"Player.GetActivePlayers"}`
+
+	// the message to lauch local media
+	body = `{
 	"id":1,"jsonrpc":"2.0",
 	"method":"Player.Open",
 	"params": {
@@ -43,6 +46,7 @@ const body = `{
 		 }
 	 }
  }`
+)
 
 // response of get players
 type itemresp struct {
@@ -210,6 +214,7 @@ func sshforward(config *ssh.ClientConfig, file, dir string) {
 	}))
 }
 
+// Parse local ssh private key to get signer
 func parseSSHKeys() ssh.Signer {
 	u, _ := user.Current()
 	home := u.HomeDir
@@ -241,11 +246,28 @@ func main() {
 	sshuser := flag.String("sshuser", "pi", "ssh login")
 	sshpassword := flag.String("sshpass", "", "ssh password")
 	sshport := flag.Int("sshport", 22, "target ssh port")
+	version := flag.Bool("version", false, fmt.Sprintf("Print the current version (%s)", VERSION))
+
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr, "Usage of %s:\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "\n%s [options] mediafile\n\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "Default mode is HTTP mode, it opens :8080 port on your host and send message to Kodi to open that port.\n")
+		fmt.Fprintf(os.Stderr, "You can use SSH with -ssh option, %s will try to use key pair authtification, then use -sshpass to try login/password auth. With -ssh, you should change -sshuser if your Kodi user is not \"pi\" (default on raspbmc)\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "To be able to authenticate without password, use the command:\n\n\tssh-copy-id USER@KODI_HOST\n\nwhere USER is the Kodi user (pi) and KODI_HOST the ip or hostname of Kodi host.")
+		fmt.Fprintf(os.Stderr, "\n\nOptions:\n")
+		flag.PrintDefaults()
+	}
 
 	flag.Parse()
 
+	if *version {
+		fmt.Println(VERSION)
+		os.Exit(0)
+	}
+
 	if *xbmcaddr == "" {
-		fmt.Println("You must provide the xbmc server address")
+		fmt.Println("\033[33mYou must provide the xbmc server address\033[0m")
+		flag.Usage()
 		os.Exit(1)
 	}
 
@@ -260,7 +282,8 @@ func main() {
 	HOST = "http://" + HOST + "/jsonrpc"
 
 	if len(flag.Args()) < 1 {
-		fmt.Println("You must provide a file to serve")
+		fmt.Println("\033[33mYou must provide a file to serve\033[0m")
+		flag.Usage()
 		os.Exit(2)
 	}
 
