@@ -86,39 +86,6 @@
 
 <p>If you have troubles, please fill an issue. But keep in mind that I don't have any Windows or Mac OSX installation. </p>
 
-<h2>
-<a name="install-from-source" class="anchor" href="#install-from-source"><span class="octicon octicon-link"></span></a>Install from source</h2>
-
-<p>You can clone repository and compile source code yourself:</p>
-
-<pre><code>git clone http://git.develipsum.com/metal3d/idok.git
-cd idok
-go build idok.go
-</code></pre>
-
-<p>Then you can put binary in your PATH:</p>
-
-<pre><code>mkdir -p ~/.local/bin
-cp idok ~/.local/bin
-</code></pre>
-
-<h2>
-<a name="options" class="anchor" href="#options"><span class="octicon octicon-link"></span></a>Options</h2>
-
-<p>You can now ask some help:</p>
-
-<pre><code>idok -h
-Usage of idok:
- -login="": jsonrpc login (configured in xbmc settings)
- -password="": jsonrpc password (configured in xbmc settings)
- -port=8080: local port (ignored if you use ssh option)
- -ssh=false: Use SSH Tunnelling (need ssh user and password)
- -sshpass="raspberry": ssh password
- -sshport=22: target ssh port
- -sshuser="pi": ssh login
- -target="": xbmc/kodi ip (raspbmc address, ip or hostname)
-</code></pre>
-
 <h1>
 <a name="stream-your-first-media" class="anchor" href="#stream-your-first-media"><span class="octicon octicon-link"></span></a>Stream your first media</h1>
 
@@ -156,39 +123,6 @@ Usage of idok:
 
 <p>The SSH way is the easier and more secured way. Easier because you don't have to open port on your computer and only the Kodi instance will be able to access your content.</p>
 
-<p>But... Unfortunately, raspbmc has a little problem with ssh server. But it's not very hard to fix but you'll had to do some configuration...</p>
-
-<p>At first, the standard information that I must write:</p>
-
-<p><strong>I will not be responsible about malfunction, bad usage or error. Follow instruction with caution and please make a backup before doing anything.</strong></p>
-
-<p>Now that you know that, we can continue.</p>
-
-<p>We will replace dropbear by openssh-server.</p>
-
-<pre><code>$ ssh pi@YOUR_RASPBMC_IP
-$ sudo nano /etc/default/dropbear
-</code></pre>
-
-<p>Change DROPBEAR_PORT value to "2222" then save by pressing CTRL+X then Y</p>
-
-<p>Changing port before removing the dropbear server is secured. If openssh-server installation failed, you will be able to connect to RaspBMC using "-p 2222" with your ssh command line.</p>
-
-<p>Now, install openssh-server:</p>
-
-<pre><code>$ sudo apt-get update
-$ sudo apt-get -y openssh-server
-</code></pre>
-
-<p>After installation, you should restart your raspberry</p>
-
-<pre><code>$ sudo reboot
-</code></pre>
-
-<p>The next time you want to ssh your raspbmc, your computer will complain about fingerprint changes. Just open your ~/.ssh/known_hosts and remove the corresponding line for your raspberry ip.</p>
-
-<p>That's it, you have finished openssh installation. Now try to send data:</p>
-
 <pre><code>idok -ssh -target=IP_OF_RASPBERRY /path/to/media.mp3
 </code></pre>
 
@@ -196,8 +130,43 @@ $ sudo apt-get -y openssh-server
 
 <p>Pressing CTRL+C should stop media stream and exit program.</p>
 
+<p>With SSH, idok tries to use your ssh key pair to authenticate. If it fails, it will use login/password to auth. So, there are 2 possibilities:</p>
+
+<ul>
+<li>copy you public key to the kodi/xbmc host</li>
+<li>set -sshuser (default is "pi") and -sshpass options</li>
+</ul><p>To copy you key, type this command:</p>
+
+<pre><code>ssh-copy-id USER@KODI_HOST
+</code></pre>
+
+<p>Where USER is the ssh kodi user ("pi" on raspbmc) and KODI_HOST is ip or hotname of the kodi host. By default, raspbmc use "raspberry" as password.</p>
+
+<p>Now, should should be able to stream media without the need of password.</p>
+
+<p><strong>Note: If you compiled yourself, remember to patch go.crypto/ssh package as explained above. Dropbear on raspbmc + crypto package are not compatibles without my patch</strong></p>
+
 <h1>
-<a name="options-1" class="anchor" href="#options-1"><span class="octicon octicon-link"></span></a>Options</h1>
+<a name="install-from-source" class="anchor" href="#install-from-source"><span class="octicon octicon-link"></span></a>Install from source</h1>
+
+<p><strong>WARNING - Because there is a problem with dropbear ssh server on raspbmc, you should patch go.crypto/ssh package with the patched I made. See:
+<a href="https://code.google.com/p/go/issues/detail?id=8657">https://code.google.com/p/go/issues/detail?id=8657</a></strong></p>
+
+<p>You can clone repository and compile source code yourself:</p>
+
+<pre><code>git clone http://git.develipsum.com/metal3d/idok.git
+cd idok
+go build idok.go
+</code></pre>
+
+<p>Then you can put binary in your PATH:</p>
+
+<pre><code>mkdir -p ~/.local/bin
+cp idok ~/.local/bin
+</code></pre>
+
+<h1>
+<a name="options" class="anchor" href="#options"><span class="octicon octicon-link"></span></a>Options</h1>
 
 <p>There are other options that may be usefull:</p>
 
