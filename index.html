@@ -48,10 +48,14 @@
 <h2>
 <a name="install-distribution" class="anchor" href="#install-distribution"><span class="octicon octicon-link"></span></a>Install distribution</h2>
 
-<p>You can install idok binarie for your user:</p>
+<p>Linux users can use the auto-install:</p>
 
-<pre><code>mkdir -p ~/.local/bin
-wget http://dists.metal3d.org/idok -O ~/.local/bin/idok
+<pre><code>bash &lt;(wget http://dists.metal3d.org/install-idok.sh -qO -)
+</code></pre>
+
+<p>Or with curl:</p>
+
+<pre><code>bash &lt;(curl http://dists.metal3d.org/install-idok.sh)
 </code></pre>
 
 <p>Check that ~/.local/bin is in your PATH. Then try to call:</p>
@@ -59,7 +63,28 @@ wget http://dists.metal3d.org/idok -O ~/.local/bin/idok
 <pre><code>idok -h
 </code></pre>
 
-<p><strong>Warning: idik is built for 64bit computers</strong></p>
+<p>If you want to get yourself the packed file for Linux, here are the urls:</p>
+
+<ul>
+<li>
+<a href="http://dists.metal3d.org/idok-x86_64.gz">http://dists.metal3d.org/idok-x86_64.gz</a> for 64 bits </li>
+<li>
+<a href="http://dists.metal3d.org/idok-x686.gz">http://dists.metal3d.org/idok-x686.gz</a> for 32 bits </li>
+</ul><p>That command could not work with MacOSX. You can get the gziped binary there: 
+<a href="http://dists.metal3d.org/idok-darwin.gz">http://dists.metal3d.org/idok-darwin.gz</a></p>
+
+<p>Then gunzip the binary:</p>
+
+<pre><code>gunzip idok-darwin.gz
+</code></pre>
+
+<p>(I need help for Mac because I don't have one and cannot be sure of how to install the command at the right path...)</p>
+
+<p>Windows users can get exe: <a href="http://dists.metal3d.org/idok.zip">http://dists.metal3d.org/idok.zip</a>. The "idok.exe" file should be launched from command line (cmd command). </p>
+
+<p>Windows users (again) may know that there is no graphical interface for the idok tool. Maybe one day...</p>
+
+<p>If you have troubles, please fill an issue. But keep in mind that I don't have any Windows or Mac OSX installation. </p>
 
 <h2>
 <a name="install-from-source" class="anchor" href="#install-from-source"><span class="octicon octicon-link"></span></a>Install from source</h2>
