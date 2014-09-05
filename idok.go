@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"net"
 	"net/http"
 	"net/url"
@@ -181,9 +182,17 @@ func sshforward(config *ssh.ClientConfig, file, dir string) {
 	}
 
 	// Setup sshConn (type net.Conn)
-	sshConn, err := sshClientConn.Listen("tcp", "127.0.0.1:0")
-	addr := sshConn.Addr()
-	port := addr.(*net.TCPAddr).Port
+	// Because dropbear doesn't accept :0 port to open random port
+	// we do the randomisation ourself
+	rand.Seed(int64(time.Now().Nanosecond()))
+	port := 10000 + rand.Intn(9999)
+	tries := 0
+	sshConn, err := sshClientConn.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", port))
+	for err != nil && tries < 500 {
+		port = 10000 + rand.Intn(9999)
+		sshConn, err = sshClientConn.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", port))
+		tries++
+	}
 	log.Println("Listening port on raspberry: ", port)
 
 	// send xbmc the file query
