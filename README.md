@@ -47,37 +47,6 @@ Windows users (again) may know that there is no graphical interface for the idok
 
 If you have troubles, please fill an issue. But keep in mind that I don't have any Windows or Mac OSX installation. 
 
-
-## Install from source
-
-You can clone repository and compile source code yourself:
-
-	git clone http://git.develipsum.com/metal3d/idok.git
-	cd idok
-	go build idok.go
-
-Then you can put binary in your PATH:
-
-	mkdir -p ~/.local/bin
-	cp idok ~/.local/bin
-
-
-## Options
-
-You can now ask some help:
-
-	idok -h
-	Usage of idok:
-	 -login="": jsonrpc login (configured in xbmc settings)
-	 -password="": jsonrpc password (configured in xbmc settings)
-	 -port=8080: local port (ignored if you use ssh option)
-	 -ssh=false: Use SSH Tunnelling (need ssh user and password)
-	 -sshpass="raspberry": ssh password
-	 -sshport=22: target ssh port
-	 -sshuser="pi": ssh login
-	 -target="": xbmc/kodi ip (raspbmc address, ip or hostname)
-
-
 Stream your first media
 =======================
 
@@ -110,41 +79,30 @@ If you've opened other port, you can set it. For example for port 1234:
 
 The SSH way is the easier and more secured way. Easier because you don't have to open port on your computer and only the Kodi instance will be able to access your content.
 
-But... Unfortunately, raspbmc has a little problem with ssh server. But it's not very hard to fix but you'll had to do some configuration...
-
-At first, the standard information that I must write:
-
-**I will not be responsible about malfunction, bad usage or error. Follow instruction with caution and please make a backup before doing anything.**
-
-Now that you know that, we can continue.
-
-We will replace dropbear by openssh-server.
-
-	$ ssh pi@YOUR_RASPBMC_IP
-	$ sudo nano /etc/default/dropbear
-
-Change DROPBEAR_PORT value to "2222" then save by pressing CTRL+X then Y
-
-Changing port before removing the dropbear server is secured. If openssh-server installation failed, you will be able to connect to RaspBMC using "-p 2222" with your ssh command line.
-
-Now, install openssh-server:
-
-	$ sudo apt-get update
-	$ sudo apt-get -y openssh-server
-
-After installation, you should restart your raspberry
-	
-	$ sudo reboot
-
-The next time you want to ssh your raspbmc, your computer will complain about fingerprint changes. Just open your ~/.ssh/known_hosts and remove the corresponding line for your raspberry ip.
-
-That's it, you have finished openssh installation. Now try to send data:
-
 	idok -ssh -target=IP_OF_RASPBERRY /path/to/media.mp3
 
 Your kodi should open the file.
 
 Pressing CTRL+C should stop media stream and exit program.
+
+**Note: If you compiled yourself, remember to patch go.crypto/ssh package as explained above. Dropbear on raspbmc + crypto package are not compatibles without my patch**
+
+Install from source
+===================
+
+**WARNING - Because there is a problem with dropbear ssh server on raspbmc, you should patch go.crypto/ssh package with the patched I made. See:
+https://code.google.com/p/go/issues/detail?id=8657**
+
+You can clone repository and compile source code yourself:
+
+	git clone http://git.develipsum.com/metal3d/idok.git
+	cd idok
+	go build idok.go
+
+Then you can put binary in your PATH:
+
+	mkdir -p ~/.local/bin
+	cp idok ~/.local/bin
 
 Options
 =======
