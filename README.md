@@ -15,16 +15,38 @@ Installation
 
 ## Install distribution
 
-You can install idok binarie for your user:
+Linux users can use the auto-install:
 
-	mkdir -p ~/.local/bin
-	wget http://dists.metal3d.org/idok -O ~/.local/bin/idok
+	bash <(wget http://dists.metal3d.org/install-idok.sh -qO -)
+
+Or with curl:
+
+	bash <(curl http://dists.metal3d.org/install-idok.sh)
 
 Check that ~/.local/bin is in your PATH. Then try to call:
 
 	idok -h
 
-**Warning: idik is built for 64bit computers**
+If you want to get yourself the packed file for Linux, here are the urls:
+
+* http://dists.metal3d.org/idok-x86_64.gz for 64 bits 
+* http://dists.metal3d.org/idok-x686.gz for 32 bits 
+
+That command could not work with MacOSX. You can get the gziped binary there: 
+http://dists.metal3d.org/idok-darwin.gz
+
+Then gunzip the binary:
+
+	gunzip idok-darwin.gz
+
+(I need help for Mac because I don't have one and cannot be sure of how to install the command at the right path...)
+
+Windows users can get exe: http://dists.metal3d.org/idok.zip. The "idok.exe" file should be launched from command line (cmd command). 
+
+Windows users (again) may know that there is no graphical interface for the idok tool. Maybe one day...
+
+If you have troubles, please fill an issue. But keep in mind that I don't have any Windows or Mac OSX installation. 
+
 
 ## Install from source
 
