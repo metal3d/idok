@@ -85,6 +85,19 @@ Your kodi should open the file.
 
 Pressing CTRL+C should stop media stream and exit program.
 
+With SSH, idok tries to use your ssh key pair to authenticate. If it fails, it will use login/password to auth. So, there are 2 possibilities:
+
+* copy you public key to the kodi/xbmc host
+* set -sshuser (default is "pi") and -sshpass options
+
+To copy you key, type this command:
+
+	ssh-copy-id USER@KODI_HOST
+
+Where USER is the ssh kodi user ("pi" on raspbmc) and KODI_HOST is ip or hotname of the kodi host. By default, raspbmc use "raspberry" as password.
+
+Now, should should be able to stream media without the need of password.
+
 **Note: If you compiled yourself, remember to patch go.crypto/ssh package as explained above. Dropbear on raspbmc + crypto package are not compatibles without my patch**
 
 Install from source
