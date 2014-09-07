@@ -152,7 +152,7 @@ Add kodi/xbmc port option (some users changed the default 80)
 ChangeLog
 =========
 
-* 0.2.4 (next release)
+* 0.2.4
   - Add youtube url support
 
 * 0.2.2
