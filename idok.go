@@ -28,7 +28,7 @@ var RASPIP string
 var SSHPORT int
 
 const (
-	VERSION = "0.2.2"
+	VERSION = "0.2.4"
 
 	// message to send to stop media
 	stopbody = `{"id":1,"jsonrpc":"2.0","method":"Player.Stop","params":{"playerid": %d}}`
@@ -46,6 +46,11 @@ const (
 		 }
 	 }
  }`
+
+	YOUTUBEAPI = `{"jsonrpc": "2.0", 
+	"method": "Player.Open", 
+	"params":{"item": {"file" : "plugin://plugin.video.youtube/?action=play_video&videoid=%s" }}, 
+	"id" : "1"}`
 )
 
 // response of get players
@@ -99,6 +104,44 @@ func onQuit() {
 		http.Post(HOST, "application/json", bytes.NewBufferString(fmt.Sprintf(stopbody, playerid)))
 		os.Exit(0)
 	}
+}
+
+// check if argument is a youtube url
+func isYoutubeURL(query string) (bool, string) {
+
+	u, _ := url.ParseRequestURI(query)
+	if u.Host == "youtu.be" {
+		return true, u.Path[1:]
+	}
+
+	u, _ = url.ParseRequestURI(query)
+	if u.Host == "www.youtube.com" || u.Host == "youtube.com" {
+		v, _ := url.ParseQuery(u.RawQuery)
+		return true, v.Get("v")
+	}
+	return false, ""
+
+}
+
+// Ask to play youtube video
+func playYoutube(vidid string) {
+
+	r, err := http.Post(HOST, "application/json", bytes.NewBufferString(fmt.Sprintf(YOUTUBEAPI, vidid)))
+	if err != nil {
+		log.Fatal(err)
+	}
+	response, _ := ioutil.ReadAll(r.Body)
+	log.Println(string(response))
+
+	// handle CTRL+C to stop
+	go onQuit()
+
+	// and wait media end
+	go checkPlaying()
+
+	// stay alive
+	c := make(chan int)
+	<-c
 }
 
 // begin to locally listen http to serve media
@@ -230,7 +273,6 @@ func parseSSHKeys() ssh.Signer {
 		log.Println("Unable to parse private key")
 		return nil
 	}
-	fmt.Println(private)
 	return private
 
 }
@@ -250,7 +292,8 @@ func main() {
 
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage of %s:\n", os.Args[0])
-		fmt.Fprintf(os.Stderr, "\n%s [options] mediafile\n\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "\n%s [options] mediafile|youtubeurl\n\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "Opening youtubeurl dosen't open local or remote port.\n")
 		fmt.Fprintf(os.Stderr, "Default mode is HTTP mode, it opens :8080 port on your host and send message to Kodi to open that port.\n")
 		fmt.Fprintf(os.Stderr, "You can use SSH with -ssh option, %s will try to use key pair authtification, then use -sshpass to try login/password auth. With -ssh, you should change -sshuser if your Kodi user is not \"pi\" (default on raspbmc)\n", os.Args[0])
 		fmt.Fprintf(os.Stderr, "To be able to authenticate without password, use the command:\n\n\tssh-copy-id USER@KODI_HOST\n\nwhere USER is the Kodi user (pi) and KODI_HOST the ip or hostname of Kodi host.")
@@ -287,12 +330,20 @@ func main() {
 		os.Exit(2)
 	}
 
+	if youtube, vid := isYoutubeURL(flag.Arg(0)); youtube {
+		playYoutube(vid)
+		os.Exit(0)
+	}
+
 	// find the good path
 	toserve := flag.Arg(0)
 	dir := "."
 	toserve, _ = filepath.Abs(toserve)
 	file := filepath.Base(toserve)
 	dir = filepath.Dir(toserve)
+
+	//	playYoutube("test")
+	//	os.Exit(0)
 
 	if *viassh {
 		config := &ssh.ClientConfig{

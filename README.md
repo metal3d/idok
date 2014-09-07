@@ -50,6 +50,15 @@ If you have troubles, please fill an issue. But keep in mind that I don't have a
 Stream your first media
 =======================
 
+## Youtube URL
+
+The simplier command is to open youtube url. Idok reoconize "youtu.be" and "www.youtube.com" hosts. Example:
+
+	idok -target=raspbmc.local "https://www.youtube.com/watch?v=o5snlP8Y5GY"
+
+As next command examples, pressing CTRL+C will stop video stream, and the command exits when video ends.
+
+
 ## HTTP (default)
 
 The HTTP way is not secured. While you're streaming to Kodi (or XBMC), the media can be accessed by other computer in your network. That's not a big problem while you're not streaming important information (restricted video). 
