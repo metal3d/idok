@@ -29,11 +29,13 @@ Check that ~/.local/bin is in your PATH. Then try to call:
 
 If you want to get yourself the packed file for Linux, here are the urls:
 
-* http://dists.metal3d.org/idok-x86_64.gz for 64 bits 
-* http://dists.metal3d.org/idok-x686.gz for 32 bits 
+* https://github.com/metal3d/idok/releases/download/0.2.4/idok-i686.gz
+* https://github.com/metal3d/idok/releases/download/0.2.4/idok-x86_64.gz
+
+
 
 That command could not work with MacOSX. You can get the gziped binary there: 
-http://dists.metal3d.org/idok-darwin.gz
+https://github.com/metal3d/idok/releases/download/0.2.4/idok-darwin.gz
 
 Then gunzip the binary:
 
@@ -41,7 +43,9 @@ Then gunzip the binary:
 
 (I need help for Mac because I don't have one and cannot be sure of how to install the command at the right path...)
 
-Windows users can get exe: http://dists.metal3d.org/idok.zip. The "idok.exe" file should be launched from command line (cmd command). 
+Windows users can get exe:
+https://github.com/metal3d/idok/releases/download/0.2.4/idok.zip
+The "idok.exe" file should be launched from command line (cmd command). 
 
 Windows users (again) may know that there is no graphical interface for the idok tool. Maybe one day...
 
