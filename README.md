@@ -58,6 +58,8 @@ The simplier command is to open youtube url. Idok reoconize "youtu.be" and "www.
 
 As next command examples, pressing CTRL+C will stop video stream, and the command exits when video ends.
 
+**Note: you must enable youtube addon on your kodi/XBMC installation.**
+
 
 ## HTTP (default)
 
@@ -147,4 +149,13 @@ I should ask dropbear maintainer why the tunneling won't work. Installing openss
 
 Add kodi/xbmc port option (some users changed the default 80) 
 
+ChangeLog
+=========
 
+* 0.2.4 (next release)
+  - Add youtube url support
+
+* 0.2.2
+  - Make use of SSH key pair
+  - Fixed standard ssh tunnel on dropbear server https://code.google.com/p/go/issues/detail?id=8657
+  - Fix randomized port for dropbear based ssh server
