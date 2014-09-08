@@ -28,7 +28,7 @@ var RASPIP string
 var SSHPORT int
 
 const (
-	VERSION = "0.2.4"
+	VERSION = "0.2.5-dev"
 
 	// message to send to stop media
 	stopbody = `{"id":1,"jsonrpc":"2.0","method":"Player.Stop","params":{"playerid": %d}}`
@@ -121,6 +121,44 @@ func isYoutubeURL(query string) (bool, string) {
 	}
 	return false, ""
 
+}
+
+// check other stream
+// return values are "is other scheme" and "is local"
+func isOtherScheme(query string) (isscheme bool, islocal bool) {
+	u, err := url.ParseRequestURI(query)
+	if err != nil {
+		log.Println("not schemed")
+		return
+	}
+	if len(u.Scheme) == 0 {
+		return
+	}
+	isscheme = true // no error so, it's a scheme
+	islocal = u.Host == "127.0.0.1" || u.Host == "localhost" || u.Host == "localhost.localdomain"
+	return
+}
+
+// send basic stream...
+func sendStream(uri string, local bool) {
+	_body := fmt.Sprintf(body, uri)
+
+	r, err := http.Post(HOST, "application/json", bytes.NewBufferString(_body))
+	if err != nil {
+		log.Fatal(err)
+	}
+	response, _ := ioutil.ReadAll(r.Body)
+	log.Println(string(response))
+
+	// handle CTRL+C to stop
+	go onQuit()
+
+	// and wait media end
+	go checkPlaying()
+
+	// stay alive
+	c := make(chan int)
+	<-c
 }
 
 // Ask to play youtube video
@@ -258,22 +296,21 @@ func sshforward(config *ssh.ClientConfig, file, dir string) {
 }
 
 // Parse local ssh private key to get signer
-func parseSSHKeys() ssh.Signer {
+func parseSSHKeys() (*ssh.Signer, error) {
 	u, _ := user.Current()
 	home := u.HomeDir
 	id_rsa_priv := filepath.Join(home, ".ssh", "id_rsa")
 	content, err := ioutil.ReadFile(id_rsa_priv)
 	if err != nil {
 		log.Println("no id_rsa key found")
-		return nil
+		return nil, err
 	}
 
 	private, err := ssh.ParsePrivateKey(content)
 	if err != nil {
 		log.Println("Unable to parse private key")
-		return nil
 	}
-	return private
+	return &private, nil
 
 }
 
@@ -335,6 +372,12 @@ func main() {
 		os.Exit(0)
 	}
 
+	if ok, local := isOtherScheme(flag.Arg(0)); ok {
+		log.Println(`Warning, other scheme could be not supported by you Kodi/XBMC installation. If doesn't work, check addons and stream`)
+		sendStream(flag.Arg(0), local)
+		os.Exit(0)
+	}
+
 	// find the good path
 	toserve := flag.Arg(0)
 	dir := "."
@@ -346,12 +389,20 @@ func main() {
 	//	os.Exit(0)
 
 	if *viassh {
+		auth := []ssh.AuthMethod{}
+		// Try to parse keypair
+		keypair, err := parseSSHKeys()
+		if err == nil {
+			auth = append(auth, ssh.PublicKeys(*keypair))
+		}
+
+		// add password method
+		auth = append(auth, ssh.Password(*sshpassword))
+
+		// and set config
 		config := &ssh.ClientConfig{
 			User: *sshuser,
-			Auth: []ssh.AuthMethod{
-				ssh.PublicKeys(parseSSHKeys()),
-				ssh.Password(*sshpassword),
-			},
+			Auth: auth,
 		}
 
 		// serve !
