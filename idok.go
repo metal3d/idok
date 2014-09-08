@@ -17,6 +17,7 @@ import (
 	"os/signal"
 	"os/user"
 	"path/filepath"
+	"runtime"
 	"syscall"
 	"time"
 )
@@ -153,9 +154,6 @@ func sendStream(uri string, local bool) {
 	// handle CTRL+C to stop
 	go onQuit()
 
-	// and wait media end
-	go checkPlaying()
-
 	// stay alive
 	c := make(chan int)
 	<-c
@@ -173,9 +171,6 @@ func playYoutube(vidid string) {
 
 	// handle CTRL+C to stop
 	go onQuit()
-
-	// and wait media end
-	go checkPlaying()
 
 	// stay alive
 	c := make(chan int)
@@ -197,6 +192,8 @@ func send(host, file string, port int) {
 	}
 	response, _ := ioutil.ReadAll(r.Body)
 	log.Println(string(response))
+	// and wait media end
+	go checkPlaying()
 }
 
 // return local ip that matches kodi network
@@ -251,9 +248,6 @@ func httpserve(file, dir string, port int) {
 	// handle CTRL+C to stop
 	go onQuit()
 
-	// and wait media end
-	go checkPlaying()
-
 	http.ListenAndServe(fmt.Sprintf("0.0.0.0:%d", port), nil)
 }
 
@@ -285,8 +279,6 @@ func sshforward(config *ssh.ClientConfig, file, dir string) {
 	go send("localhost", file, port)
 	// handle CTRL+C to stop
 	go onQuit()
-	// and wait media end
-	go checkPlaying()
 
 	// now serve file
 	fullpath := filepath.Join(dir, file)
@@ -296,21 +288,13 @@ func sshforward(config *ssh.ClientConfig, file, dir string) {
 }
 
 // Parse local ssh private key to get signer
-func parseSSHKeys() (*ssh.Signer, error) {
-	u, _ := user.Current()
-	home := u.HomeDir
-	id_rsa_priv := filepath.Join(home, ".ssh", "id_rsa")
-	content, err := ioutil.ReadFile(id_rsa_priv)
-	if err != nil {
-		log.Println("no id_rsa key found")
-		return nil, err
-	}
-
+func parseSSHKeys(keyfile string) ssh.Signer {
+	content, err := ioutil.ReadFile(keyfile)
 	private, err := ssh.ParsePrivateKey(content)
 	if err != nil {
 		log.Println("Unable to parse private key")
 	}
-	return &private, nil
+	return private
 
 }
 
@@ -340,8 +324,10 @@ func main() {
 
 	flag.Parse()
 
+	// print the current version
 	if *version {
 		fmt.Println(VERSION)
+		fmt.Println("Compiled for", runtime.GOOS, runtime.GOARCH)
 		os.Exit(0)
 	}
 
@@ -389,11 +375,23 @@ func main() {
 	//	os.Exit(0)
 
 	if *viassh {
+		u, _ := user.Current()
+		home := u.HomeDir
+		id_rsa_priv := filepath.Join(home, ".ssh", "id_rsa")
+		id_dsa_priv := filepath.Join(home, ".ssh", "id_dsa")
+
 		auth := []ssh.AuthMethod{}
+
 		// Try to parse keypair
-		keypair, err := parseSSHKeys()
-		if err == nil {
-			auth = append(auth, ssh.PublicKeys(*keypair))
+		if _, err := os.Stat(id_rsa_priv); err == nil {
+			keypair := parseSSHKeys(id_rsa_priv)
+			log.Println("Use RSA key")
+			auth = append(auth, ssh.PublicKeys(keypair))
+		}
+		if _, err := os.Stat(id_dsa_priv); err == nil {
+			keypair := parseSSHKeys(id_dsa_priv)
+			log.Println("Use DSA key")
+			auth = append(auth, ssh.PublicKeys(keypair))
 		}
 
 		// add password method
