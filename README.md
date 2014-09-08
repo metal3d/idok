@@ -17,11 +17,11 @@ Installation
 
 Linux users can use the auto-install:
 
-	bash <(wget http://dists.metal3d.org/install-idok.sh -qO -)
+	bash <(wget https://github.com/metal3d/idok/releases/download/0.2.6/install-idok.sh -qO -)
 
 Or with curl:
 
-	bash <(curl http://dists.metal3d.org/install-idok.sh)
+	bash <(curl -L https://github.com/metal3d/idok/releases/download/0.2.6/install-idok.sh)
 
 Check that ~/.local/bin is in your PATH. Then try to call:
 
