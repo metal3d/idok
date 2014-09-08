@@ -29,7 +29,7 @@ var RASPIP string
 var SSHPORT int
 
 const (
-	VERSION = "0.2.5-dev"
+	VERSION = "0.2.6"
 
 	// message to send to stop media
 	stopbody = `{"id":1,"jsonrpc":"2.0","method":"Player.Stop","params":{"playerid": %d}}`
