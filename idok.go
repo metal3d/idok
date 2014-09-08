@@ -17,6 +17,7 @@ import (
 	"os/signal"
 	"os/user"
 	"path/filepath"
+	"runtime"
 	"syscall"
 	"time"
 )
@@ -28,7 +29,7 @@ var RASPIP string
 var SSHPORT int
 
 const (
-	VERSION = "0.2.4"
+	VERSION = "0.2.6"
 
 	// message to send to stop media
 	stopbody = `{"id":1,"jsonrpc":"2.0","method":"Player.Stop","params":{"playerid": %d}}`
@@ -123,6 +124,41 @@ func isYoutubeURL(query string) (bool, string) {
 
 }
 
+// check other stream
+// return values are "is other scheme" and "is local"
+func isOtherScheme(query string) (isscheme bool, islocal bool) {
+	u, err := url.ParseRequestURI(query)
+	if err != nil {
+		log.Println("not schemed")
+		return
+	}
+	if len(u.Scheme) == 0 {
+		return
+	}
+	isscheme = true // no error so, it's a scheme
+	islocal = u.Host == "127.0.0.1" || u.Host == "localhost" || u.Host == "localhost.localdomain"
+	return
+}
+
+// send basic stream...
+func sendStream(uri string, local bool) {
+	_body := fmt.Sprintf(body, uri)
+
+	r, err := http.Post(HOST, "application/json", bytes.NewBufferString(_body))
+	if err != nil {
+		log.Fatal(err)
+	}
+	response, _ := ioutil.ReadAll(r.Body)
+	log.Println(string(response))
+
+	// handle CTRL+C to stop
+	go onQuit()
+
+	// stay alive
+	c := make(chan int)
+	<-c
+}
+
 // Ask to play youtube video
 func playYoutube(vidid string) {
 
@@ -135,9 +171,6 @@ func playYoutube(vidid string) {
 
 	// handle CTRL+C to stop
 	go onQuit()
-
-	// and wait media end
-	go checkPlaying()
 
 	// stay alive
 	c := make(chan int)
@@ -159,6 +192,8 @@ func send(host, file string, port int) {
 	}
 	response, _ := ioutil.ReadAll(r.Body)
 	log.Println(string(response))
+	// and wait media end
+	go checkPlaying()
 }
 
 // return local ip that matches kodi network
@@ -213,9 +248,6 @@ func httpserve(file, dir string, port int) {
 	// handle CTRL+C to stop
 	go onQuit()
 
-	// and wait media end
-	go checkPlaying()
-
 	http.ListenAndServe(fmt.Sprintf("0.0.0.0:%d", port), nil)
 }
 
@@ -247,8 +279,6 @@ func sshforward(config *ssh.ClientConfig, file, dir string) {
 	go send("localhost", file, port)
 	// handle CTRL+C to stop
 	go onQuit()
-	// and wait media end
-	go checkPlaying()
 
 	// now serve file
 	fullpath := filepath.Join(dir, file)
@@ -258,20 +288,11 @@ func sshforward(config *ssh.ClientConfig, file, dir string) {
 }
 
 // Parse local ssh private key to get signer
-func parseSSHKeys() ssh.Signer {
-	u, _ := user.Current()
-	home := u.HomeDir
-	id_rsa_priv := filepath.Join(home, ".ssh", "id_rsa")
-	content, err := ioutil.ReadFile(id_rsa_priv)
-	if err != nil {
-		log.Println("no id_rsa key found")
-		return nil
-	}
-
+func parseSSHKeys(keyfile string) ssh.Signer {
+	content, err := ioutil.ReadFile(keyfile)
 	private, err := ssh.ParsePrivateKey(content)
 	if err != nil {
 		log.Println("Unable to parse private key")
-		return nil
 	}
 	return private
 
@@ -303,8 +324,10 @@ func main() {
 
 	flag.Parse()
 
+	// print the current version
 	if *version {
 		fmt.Println(VERSION)
+		fmt.Println("Compiled for", runtime.GOOS, runtime.GOARCH)
 		os.Exit(0)
 	}
 
@@ -335,6 +358,12 @@ func main() {
 		os.Exit(0)
 	}
 
+	if ok, local := isOtherScheme(flag.Arg(0)); ok {
+		log.Println(`Warning, other scheme could be not supported by you Kodi/XBMC installation. If doesn't work, check addons and stream`)
+		sendStream(flag.Arg(0), local)
+		os.Exit(0)
+	}
+
 	// find the good path
 	toserve := flag.Arg(0)
 	dir := "."
@@ -346,12 +375,32 @@ func main() {
 	//	os.Exit(0)
 
 	if *viassh {
+		u, _ := user.Current()
+		home := u.HomeDir
+		id_rsa_priv := filepath.Join(home, ".ssh", "id_rsa")
+		id_dsa_priv := filepath.Join(home, ".ssh", "id_dsa")
+
+		auth := []ssh.AuthMethod{}
+
+		// Try to parse keypair
+		if _, err := os.Stat(id_rsa_priv); err == nil {
+			keypair := parseSSHKeys(id_rsa_priv)
+			log.Println("Use RSA key")
+			auth = append(auth, ssh.PublicKeys(keypair))
+		}
+		if _, err := os.Stat(id_dsa_priv); err == nil {
+			keypair := parseSSHKeys(id_dsa_priv)
+			log.Println("Use DSA key")
+			auth = append(auth, ssh.PublicKeys(keypair))
+		}
+
+		// add password method
+		auth = append(auth, ssh.Password(*sshpassword))
+
+		// and set config
 		config := &ssh.ClientConfig{
 			User: *sshuser,
-			Auth: []ssh.AuthMethod{
-				ssh.PublicKeys(parseSSHKeys()),
-				ssh.Password(*sshpassword),
-			},
+			Auth: auth,
 		}
 
 		// serve !
