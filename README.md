@@ -156,6 +156,12 @@ Add kodi/xbmc port option (some users changed the default 80)
 ChangeLog
 =========
 
+* 0.2.6
+  - fix issue #1 (reported at http://forum.xbmc.org/showthread.php?tid=203834)
+  - Now, if idok wait reponse to check playing status
+  - Add DSA key managment
+  - Add some information in -verion option
+
 * 0.2.4
   - Add youtube url support
 
