@@ -51,12 +51,12 @@
 
 <p>Linux users can use the auto-install:</p>
 
-<pre><code>bash &lt;(wget http://dists.metal3d.org/install-idok.sh -qO -)
+<pre><code>bash &lt;(wget https://github.com/metal3d/idok/releases/download/0.2.6/install-idok.sh -qO -)
 </code></pre>
 
 <p>Or with curl:</p>
 
-<pre><code>bash &lt;(curl http://dists.metal3d.org/install-idok.sh)
+<pre><code>bash &lt;(curl -L https://github.com/metal3d/idok/releases/download/0.2.6/install-idok.sh)
 </code></pre>
 
 <p>Check that ~/.local/bin is in your PATH. Then try to call:</p>
@@ -203,6 +203,16 @@ cp idok ~/.local/bin
 <a name="changelog" class="anchor" href="#changelog"><span class="octicon octicon-link"></span></a>ChangeLog</h1>
 
 <ul>
+<li>
+<p>0.2.6</p>
+
+<ul>
+<li>fix issue #1 (reported at <a href="http://forum.xbmc.org/showthread.php?tid=203834">http://forum.xbmc.org/showthread.php?tid=203834</a>)</li>
+<li>Now, if idok wait reponse to check playing status</li>
+<li>Add DSA key managment</li>
+<li>Add some information in -verion option</li>
+</ul>
+</li>
 <li>
 <p>0.2.4</p>
 
