@@ -29,13 +29,13 @@ Check that ~/.local/bin is in your PATH. Then try to call:
 
 If you want to get yourself the packed file for Linux, here are the urls:
 
-* https://github.com/metal3d/idok/releases/download/0.2.4/idok-i686.gz
-* https://github.com/metal3d/idok/releases/download/0.2.4/idok-x86_64.gz
+* https://github.com/metal3d/idok/releases/download/0.2.6/idok-i686.gz
+* https://github.com/metal3d/idok/releases/download/0.2.6/idok-x86_64.gz
 
 
 
 That command could not work with MacOSX. You can get the gziped binary there: 
-https://github.com/metal3d/idok/releases/download/0.2.4/idok-darwin.gz
+https://github.com/metal3d/idok/releases/download/0.2.6/idok-darwin.gz
 
 Then gunzip the binary:
 
@@ -44,7 +44,7 @@ Then gunzip the binary:
 (I need help for Mac because I don't have one and cannot be sure of how to install the command at the right path...)
 
 Windows users can get exe:
-https://github.com/metal3d/idok/releases/download/0.2.4/idok.zip
+https://github.com/metal3d/idok/releases/download/0.2.6/idok.zip
 The "idok.exe" file should be launched from command line (cmd command). 
 
 Windows users (again) may know that there is no graphical interface for the idok tool. Maybe one day...
@@ -157,6 +157,7 @@ ChangeLog
 =========
 
 * 0.2.6
+  - can now open http stream or video other that youtube
   - fix issue #1 (reported at http://forum.xbmc.org/showthread.php?tid=203834)
   - Now, if idok wait reponse to check playing status
   - Add DSA key managment
