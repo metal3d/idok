@@ -25,7 +25,7 @@ import (
 var PORT string
 var HOST string
 var LISTEN string
-var RASPIP string
+var TARGETIP string
 var SSHPORT int
 
 const (
@@ -199,7 +199,7 @@ func send(host, file string, port int) {
 // return local ip that matches kodi network
 // ignoring loopback and other net interfaces
 func getLocalInterfaceIP() (string, error) {
-	ips, _ := net.LookupIP(RASPIP)
+	ips, _ := net.LookupIP(TARGETIP)
 	ifaces, err := net.Interfaces()
 	if err != nil {
 		log.Fatalf("Error while checking you interfaces: %v", err)
@@ -256,7 +256,7 @@ func httpserve(file, dir string, port int) {
 func sshforward(config *ssh.ClientConfig, file, dir string) {
 
 	// Setup sshClientConn (type *ssh.ClientConn)
-	sshClientConn, err := ssh.Dial("tcp", fmt.Sprintf("%s:%d", RASPIP, SSHPORT), config)
+	sshClientConn, err := ssh.Dial("tcp", fmt.Sprintf("%s:%d", TARGETIP, SSHPORT), config)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -310,11 +310,13 @@ func main() {
 	sshpassword := flag.String("sshpass", "", "ssh password")
 	sshport := flag.Int("sshport", 22, "target ssh port")
 	version := flag.Bool("version", false, fmt.Sprintf("Print the current version (%s)", VERSION))
+	xbmcport := flag.Int("targetport", 80, "XBMC/Kodi jsonrpc port")
 
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage of %s:\n", os.Args[0])
 		fmt.Fprintf(os.Stderr, "\n%s [options] mediafile|youtubeurl\n\n", os.Args[0])
-		fmt.Fprintf(os.Stderr, "Opening youtubeurl dosen't open local or remote port.\n")
+		fmt.Fprintf(os.Stderr, "Opening youtube urls dosen't open local or remote port.\n")
+		fmt.Fprintf(os.Stderr, "Using ssh option is only managed for local files.\n")
 		fmt.Fprintf(os.Stderr, "Default mode is HTTP mode, it opens :8080 port on your host and send message to Kodi to open that port.\n")
 		fmt.Fprintf(os.Stderr, "You can use SSH with -ssh option, %s will try to use key pair authtification, then use -sshpass to try login/password auth. With -ssh, you should change -sshuser if your Kodi user is not \"pi\" (default on raspbmc)\n", os.Args[0])
 		fmt.Fprintf(os.Stderr, "To be able to authenticate without password, use the command:\n\n\tssh-copy-id USER@KODI_HOST\n\nwhere USER is the Kodi user (pi) and KODI_HOST the ip or hostname of Kodi host.")
@@ -338,13 +340,14 @@ func main() {
 	}
 
 	HOST = *xbmcaddr
-	RASPIP = *xbmcaddr
+	TARGETIP = *xbmcaddr
 	SSHPORT = *sshport
 
 	// XBMC can be configured to have username/password
 	if *username != "" {
 		HOST = *username + ":" + *password + "@" + HOST
 	}
+	HOST := fmt.Sprintf("http://%s:%d/jsonrpc", HOST, *xbmcport)
 	HOST = "http://" + HOST + "/jsonrpc"
 
 	if len(flag.Args()) < 1 {
