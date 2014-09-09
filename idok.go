@@ -29,7 +29,7 @@ var TARGETIP string
 var SSHPORT int
 
 const (
-	VERSION = "0.2.6"
+	VERSION = "0.2.8-pre"
 
 	// message to send to stop media
 	stopbody = `{"id":1,"jsonrpc":"2.0","method":"Player.Stop","params":{"playerid": %d}}`
@@ -347,8 +347,8 @@ func main() {
 	if *username != "" {
 		HOST = *username + ":" + *password + "@" + HOST
 	}
-	HOST := fmt.Sprintf("http://%s:%d/jsonrpc", HOST, *xbmcport)
-	HOST = "http://" + HOST + "/jsonrpc"
+
+	HOST = fmt.Sprintf("http://%s:%d/jsonrpc", HOST, *xbmcport)
 
 	if len(flag.Args()) < 1 {
 		fmt.Println("\033[33mYou must provide a file to serve\033[0m")
