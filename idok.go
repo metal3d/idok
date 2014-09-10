@@ -30,7 +30,7 @@ var TARGETIP string
 var SSHPORT int
 
 const (
-	VERSION = "0.2.8-pre"
+	VERSION = "20140910-1"
 
 	// message to send to stop media
 	stopbody = `{"id":1,"jsonrpc":"2.0","method":"Player.Stop","params":{"playerid": %d}}`
