@@ -17,11 +17,11 @@ Installation
 
 Linux users can use the auto-install:
 
-	bash <(wget https://github.com/metal3d/idok/releases/download/0.2.6/install-idok.sh -qO -)
+	bash <(wget https://github.com/metal3d/idok/releases/download/20140910-1/install-idok.sh -qO -)
 
 Or with curl:
 
-	bash <(curl -L https://github.com/metal3d/idok/releases/download/0.2.6/install-idok.sh)
+	bash <(curl -L https://github.com/metal3d/idok/releases/download/20140910-1/install-idok.sh)
 
 Check that ~/.local/bin is in your PATH. Then try to call:
 
@@ -29,13 +29,13 @@ Check that ~/.local/bin is in your PATH. Then try to call:
 
 If you want to get yourself the packed file for Linux, here are the urls:
 
-* https://github.com/metal3d/idok/releases/download/0.2.6/idok-i686.gz
-* https://github.com/metal3d/idok/releases/download/0.2.6/idok-x86_64.gz
+* https://github.com/metal3d/idok/releases/download/20140910-1/idok-i686.gz
+* https://github.com/metal3d/idok/releases/download/20140910-1/idok-x86_64.gz
 
 
 
 That command could not work with MacOSX. You can get the gziped binary there: 
-https://github.com/metal3d/idok/releases/download/0.2.6/idok-darwin.gz
+https://github.com/metal3d/idok/releases/download/20140910-1/idok-darwin.gz
 
 Then gunzip the binary:
 
@@ -44,7 +44,7 @@ Then gunzip the binary:
 (I need help for Mac because I don't have one and cannot be sure of how to install the command at the right path...)
 
 Windows users can get exe:
-https://github.com/metal3d/idok/releases/download/0.2.6/idok.zip
+https://github.com/metal3d/idok/releases/download/20140910-1/idok.zip
 The "idok.exe" file should be launched from command line (cmd command). 
 
 Windows users (again) may know that there is no graphical interface for the idok tool. Maybe one day...
@@ -115,6 +115,30 @@ Now, should should be able to stream media without the need of password.
 
 **Note: If you compiled yourself, remember to patch go.crypto/ssh package as explained above. Dropbear on raspbmc + crypto package are not compatibles without my patch**
 
+
+Some other streams you can make
+===============================
+
+The -stdin option is a cool new functionnality that "ianux", an user that contact me on DLFP page, gave me as a challenge. Since Idok can now use this option, I discovered that I'm able to make a lot of nice stream to my Kodi installation.
+
+## Gstreamer - screencast to kodi
+Gstreamer can be used to stream medias to stdout using "fdsink" or "filesink location=/dev/stdout". 
+
+If you're using operating system that can be able to launch gstreamer pipelines, here is a nice "screencast stream":
+
+	gst-launch-1.0 -q ximagesrc remote=1 ! videoconvert  ! avenc_mpeg4 ! mpegtsmux ! filesink location=/dev/stdout | idok -stdin -ssh -target=YOUR_KODI_IP
+
+Remove "remote=1" on "non fedora 20", this option is needed as far as I know on Fedora 20 (reported bug)
+
+## livestreamer - ISS station from space from ustream
+
+Livestreamer is a python tool that is able to fectch streams from some servers and is able to give an url. For some streams, it's impossible to get URL, but we can use "-O" option that dump stream to stdout. So...
+
+	livestreamer http://www.ustream.tv/channel/iss-hdev-payload 480p -Q -O | idok -stdin -ssh -target=YOUR_KODI_IP
+
+That will launch the ISS live video from space (sometimes the image is black because ISS station is on the night side. Wait 5 minutes and you will see...)
+
+
 Install from source
 ===================
 
@@ -149,12 +173,21 @@ There are other options that may be usefull:
 TODO
 ====
 
-I should ask dropbear maintainer why the tunneling won't work. Installing openssh-server on raspbmc can be complicated for some users.
+- Refactorisation to be more maintainable
+- GUI (or not...)
+- better lookup adresse for -target option
 
-Add kodi/xbmc port option (some users changed the default 80) 
 
 ChangeLog
 =========
+
+* 20140910-1
+  - Can now open streams through stdin (livestreamer, gstreamer, etc...) (thanks to "anxt" on gstreamer irc channel, thanks to ianux on DLFP that gives the idea)
+  - Fixes some needed options
+  - prepared to be refactored
+  - version number is now "modern" (thanks user "Baud" on DLFP)
+  - Fixes documentation
+  - Prepare examples
 
 * 0.2.6
   - can now open http stream or video other that youtube
