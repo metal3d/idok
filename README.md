@@ -27,27 +27,18 @@ Check that ~/.local/bin is in your PATH. Then try to call:
 
 	idok -h
 
-If you want to get yourself the packed file for Linux, here are the urls:
+If you want to get yourself the packed file for Linux, FreeBSD, MacOSX and Windows, here are the urls:
 
-* https://github.com/metal3d/idok/releases/download/20140910-1/idok-i686.gz
-* https://github.com/metal3d/idok/releases/download/20140910-1/idok-x86_64.gz
-
-
-
-That command could not work with MacOSX. You can get the gziped binary there: 
-https://github.com/metal3d/idok/releases/download/20140910-1/idok-darwin.gz
-
-Then gunzip the binary:
-
-	gunzip idok-darwin.gz
+* [Linux x64](https://github.com/metal3d/idok/releases/download/20140910-1/idok-x86_64.gz)
+* [Linux i686](https://github.com/metal3d/idok/releases/download/20140910-1/idok-i686.gz)
+* [FreeBSD 64 bits](https://github.com/metal3d/idok/releases/download/20140910-1/idok-freebsd64.gz)
+* [FreeBSD 32 bits](https://github.com/metal3d/idok/releases/download/20140910-1/idok-freebsd32.gz)
+* [MacOSX 64 bits](https://github.com/metal3d/idok/releases/download/20140910-1/idok-darwin.gz)
+* [Windows 64 bits](https://github.com/metal3d/idok/releases/download/20140910-1/idok.zip)
 
 (I need help for Mac because I don't have one and cannot be sure of how to install the command at the right path...)
 
-Windows users can get exe:
-https://github.com/metal3d/idok/releases/download/20140910-1/idok.zip
-The "idok.exe" file should be launched from command line (cmd command). 
-
-Windows users (again) may know that there is no graphical interface for the idok tool. Maybe one day...
+Windows users may know that there is no graphical interface for the idok tool. Maybe one day...
 
 If you have troubles, please fill an issue. But keep in mind that I don't have any Windows or Mac OSX installation. 
 
