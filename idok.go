@@ -7,6 +7,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -178,12 +179,12 @@ func playYoutube(vidid string) {
 }
 
 // begin to locally listen http to serve media
-func send(host, file string, port int) {
+func send(scheme, host, file string, port int) {
 
 	u := url.URL{Path: file}
 	file = u.String()
 	//_body := fmt.Sprintf(body, "http://"+LISTEN+":"+PORT+"/"+file)
-	addr := fmt.Sprintf("http://%s:%d/%s", host, port, file)
+	addr := fmt.Sprintf("%s://%s:%d/%s", scheme, host, port, file)
 	_body := fmt.Sprintf(body, addr)
 
 	r, err := http.Post(HOST, "application/json", bytes.NewBufferString(_body))
@@ -243,12 +244,80 @@ func httpserve(file, dir string, port int) {
 	}))
 
 	// send xbmc the file query
-	go send(localip, file, port)
+	go send("http", localip, file, port)
 
 	// handle CTRL+C to stop
 	go onQuit()
 
 	http.ListenAndServe(fmt.Sprintf("0.0.0.0:%d", port), nil)
+}
+
+func httpserverstdin(port int) {
+
+	localip, err := getLocalInterfaceIP()
+	log.Println(localip)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// send xbmc the file query
+	go send("tcp", localip, "", port)
+	con, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", port))
+	if err != nil {
+		log.Fatal(err)
+	}
+	c, err := con.Accept()
+	if err != nil {
+		log.Fatal(err)
+	}
+	go io.Copy(c, os.Stdin)
+
+	// handle CTRL+C to stop
+	go onQuit()
+
+	w := make(chan int)
+	<-w
+
+}
+
+func sshforwardstdin(config *ssh.ClientConfig) {
+
+	// Setup sshClientConn (type *ssh.ClientConn)
+	sshClientConn, err := ssh.Dial("tcp", fmt.Sprintf("%s:%d", TARGETIP, SSHPORT), config)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Setup sshConn (type net.Conn)
+	// Because dropbear doesn't accept :0 port to open random port
+	// we do the randomisation ourself
+	rand.Seed(int64(time.Now().Nanosecond()))
+	port := 10000 + rand.Intn(9999)
+	tries := 0
+	sshConn, err := sshClientConn.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", port))
+	for err != nil && tries < 500 {
+		port = 10000 + rand.Intn(9999)
+		sshConn, err = sshClientConn.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", port))
+		tries++
+	}
+	log.Println("Listening port on raspberry: ", port)
+
+	// send xbmc the file query
+	go send("tcp", "127.0.0.1", "", port)
+	if err != nil {
+		log.Fatal(err)
+	}
+	c, err := sshConn.Accept()
+	if err != nil {
+		log.Fatal(err)
+	}
+	go io.Copy(c, os.Stdin)
+
+	// handle CTRL+C to stop
+	go onQuit()
+
+	w := make(chan int)
+	<-w
 }
 
 // Dig tunnel to kodi, open a port and bind socket to
@@ -276,7 +345,7 @@ func sshforward(config *ssh.ClientConfig, file, dir string) {
 	log.Println("Listening port on raspberry: ", port)
 
 	// send xbmc the file query
-	go send("localhost", file, port)
+	go send("http", "localhost", file, port)
 	// handle CTRL+C to stop
 	go onQuit()
 
@@ -311,6 +380,7 @@ func main() {
 	sshport := flag.Int("sshport", 22, "target ssh port")
 	version := flag.Bool("version", false, fmt.Sprintf("Print the current version (%s)", VERSION))
 	xbmcport := flag.Int("targetport", 80, "XBMC/Kodi jsonrpc port")
+	stdin := flag.Bool("stdin", false, "Read file from stdin")
 
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage of %s:\n", os.Args[0])
@@ -350,32 +420,40 @@ func main() {
 
 	HOST = fmt.Sprintf("http://%s:%d/jsonrpc", HOST, *xbmcport)
 
-	if len(flag.Args()) < 1 {
-		fmt.Println("\033[33mYou must provide a file to serve\033[0m")
-		flag.Usage()
-		os.Exit(2)
+	var dir, file string
+
+	// we don't use stdin, so we should check if scheme is file, youtube or other...
+	if !*stdin {
+		if len(flag.Args()) < 1 {
+			fmt.Println("\033[33mYou must provide a file to serve\033[0m")
+			flag.Usage()
+			os.Exit(2)
+		}
+
+		if *viassh {
+			log.Println("-ssh option given but you ask to open a schemed stream. -ssh is ignored")
+		}
+
+		if youtube, vid := isYoutubeURL(flag.Arg(0)); youtube {
+			log.Println("Youtube video, using youtube addon from XBMC/Kodi")
+			playYoutube(vid)
+			os.Exit(0)
+		}
+
+		if ok, local := isOtherScheme(flag.Arg(0)); ok {
+			log.Println("\033[33mWarning, other scheme could be not supported by you Kodi/XBMC installation. If doesn't work, check addons and stream\033[0m")
+			sendStream(flag.Arg(0), local)
+			os.Exit(0)
+		}
+
+		// find the good path
+		toserve := flag.Arg(0)
+		dir = "."
+		toserve, _ = filepath.Abs(toserve)
+		file = filepath.Base(toserve)
+		dir = filepath.Dir(toserve)
+
 	}
-
-	if youtube, vid := isYoutubeURL(flag.Arg(0)); youtube {
-		playYoutube(vid)
-		os.Exit(0)
-	}
-
-	if ok, local := isOtherScheme(flag.Arg(0)); ok {
-		log.Println(`Warning, other scheme could be not supported by you Kodi/XBMC installation. If doesn't work, check addons and stream`)
-		sendStream(flag.Arg(0), local)
-		os.Exit(0)
-	}
-
-	// find the good path
-	toserve := flag.Arg(0)
-	dir := "."
-	toserve, _ = filepath.Abs(toserve)
-	file := filepath.Base(toserve)
-	dir = filepath.Dir(toserve)
-
-	//	playYoutube("test")
-	//	os.Exit(0)
 
 	if *viassh {
 		u, _ := user.Current()
@@ -406,9 +484,18 @@ func main() {
 			Auth: auth,
 		}
 
-		// serve !
-		sshforward(config, file, dir)
+		// serve ssh tunnel !
+		if !*stdin {
+			sshforward(config, file, dir)
+		} else {
+			sshforwardstdin(config)
+		}
 	} else {
-		httpserve(file, dir, *port)
+		// serve local port !
+		if !*stdin {
+			httpserve(file, dir, *port)
+		} else {
+			httpserverstdin(*port)
+		}
 	}
 }
