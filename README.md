@@ -85,11 +85,9 @@ That command open port 8080 (http-alt) to stream media. If you want to use anoth
 
 **Note**
 
-This solution need to open port on your firewall. 
+This solution needs to open port on your firewall. 
 
-By default, idok opens 8080 port (http-alternative), but you can specify other port using "-port" option.
-
-At first, you must be sure that the port is opened. To open firewall port on you linux installation:
+You must be sure that the port is opened. On Linux, to open firewall port on you linux installation:
 
 	firewall-cmd --add-port=8080/tcp
 
@@ -112,7 +110,7 @@ Pressing CTRL+C should stop media stream and exit program.
 With SSH, idok tries to use your ssh key pair to authenticate. If it fails, it will use login/password to auth. So, there are 2 possibilities:
 
 * copy you public key to the kodi/xbmc host (with ssh-copy-id for example)
-* set -sshuser (default is "pi") and -sshpass options
+* set -sshuser (if user is not "pi") and -sshpass options (if password is not "raspberry")
 
 To copy you key, type this command:
 
