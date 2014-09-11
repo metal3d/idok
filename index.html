@@ -51,12 +51,12 @@
 
 <p>Linux users can use the auto-install:</p>
 
-<pre><code>bash &lt;(wget https://github.com/metal3d/idok/releases/download/0.2.6/install-idok.sh -qO -)
+<pre><code>bash &lt;(wget https://github.com/metal3d/idok/releases/download/20140910-1/install-idok.sh -qO -)
 </code></pre>
 
 <p>Or with curl:</p>
 
-<pre><code>bash &lt;(curl -L https://github.com/metal3d/idok/releases/download/0.2.6/install-idok.sh)
+<pre><code>bash &lt;(curl -L https://github.com/metal3d/idok/releases/download/20140910-1/install-idok.sh)
 </code></pre>
 
 <p>Check that ~/.local/bin is in your PATH. Then try to call:</p>
@@ -64,54 +64,74 @@
 <pre><code>idok -h
 </code></pre>
 
-<p>If you want to get yourself the packed file for Linux, here are the urls:</p>
+<p>If you want to get yourself the packed file for Linux, FreeBSD, MacOSX and Windows, here are the urls:</p>
 
 <ul>
-<li><a href="https://github.com/metal3d/idok/releases/download/0.2.4/idok-i686.gz">https://github.com/metal3d/idok/releases/download/0.2.4/idok-i686.gz</a></li>
-<li><a href="https://github.com/metal3d/idok/releases/download/0.2.4/idok-x86_64.gz">https://github.com/metal3d/idok/releases/download/0.2.4/idok-x86_64.gz</a></li>
-</ul><p>That command could not work with MacOSX. You can get the gziped binary there: 
-<a href="https://github.com/metal3d/idok/releases/download/0.2.4/idok-darwin.gz">https://github.com/metal3d/idok/releases/download/0.2.4/idok-darwin.gz</a></p>
+<li><a href="https://github.com/metal3d/idok/releases/download/20140910-1/idok-x86_64.gz">Linux x64</a></li>
+<li><a href="https://github.com/metal3d/idok/releases/download/20140910-1/idok-i686.gz">Linux i686</a></li>
+<li><a href="https://github.com/metal3d/idok/releases/download/20140910-1/idok-freebsd64.gz">FreeBSD 64 bits</a></li>
+<li><a href="https://github.com/metal3d/idok/releases/download/20140910-1/idok-freebsd32.gz">FreeBSD 32 bits</a></li>
+<li><a href="https://github.com/metal3d/idok/releases/download/20140910-1/idok-darwin.gz">MacOSX 64 bits</a></li>
+<li><a href="https://github.com/metal3d/idok/releases/download/20140910-1/idok.zip">Windows 64 bits</a></li>
+</ul><p>(I need help for Mac because I don't have one and cannot be sure of how to install the command at the right path...)</p>
 
-<p>Then gunzip the binary:</p>
-
-<pre><code>gunzip idok-darwin.gz
-</code></pre>
-
-<p>(I need help for Mac because I don't have one and cannot be sure of how to install the command at the right path...)</p>
-
-<p>Windows users can get exe:
-<a href="https://github.com/metal3d/idok/releases/download/0.2.4/idok.zip">https://github.com/metal3d/idok/releases/download/0.2.4/idok.zip</a>
-The "idok.exe" file should be launched from command line (cmd command). </p>
-
-<p>Windows users (again) may know that there is no graphical interface for the idok tool. Maybe one day...</p>
+<p>Windows users may know that there is no graphical interface for the idok tool. Maybe one day...</p>
 
 <p>If you have troubles, please fill an issue. But keep in mind that I don't have any Windows or Mac OSX installation. </p>
 
 <h1>
-<a name="stream-your-first-media" class="anchor" href="#stream-your-first-media"><span class="octicon octicon-link"></span></a>Stream your first media</h1>
+<a name="stream-medias" class="anchor" href="#stream-medias"><span class="octicon octicon-link"></span></a>Stream medias</h1>
 
 <h2>
 <a name="youtube-url" class="anchor" href="#youtube-url"><span class="octicon octicon-link"></span></a>Youtube URL</h2>
 
-<p>The simplier command is to open youtube url. Idok reoconize "youtu.be" and "www.youtube.com" hosts. Example:</p>
+<p>Open a youtube url is simple</p>
 
-<pre><code>idok -target=raspbmc.local "https://www.youtube.com/watch?v=o5snlP8Y5GY"
+<pre><code>idok -target=YOUR_KODI_IP "https://www.youtube.com/watch?v=o5snlP8Y5GY"
 </code></pre>
 
-<p>As next command examples, pressing CTRL+C will stop video stream, and the command exits when video ends.</p>
+<p>This will ask XBMC/Kodi to open this video. This doesn't stream video from your computer, so that's not use port opening and/or ssh tunnel.</p>
 
 <p><strong>Note: you must enable youtube addon on your kodi/XBMC installation.</strong></p>
 
 <h2>
-<a name="http-default" class="anchor" href="#http-default"><span class="octicon octicon-link"></span></a>HTTP (default)</h2>
+<a name="distant-medias" class="anchor" href="#distant-medias"><span class="octicon octicon-link"></span></a>distant medias</h2>
 
-<p>The HTTP way is not secured. While you're streaming to Kodi (or XBMC), the media can be accessed by other computer in your network. That's not a big problem while you're not streaming important information (restricted video). </p>
+<p>You can open http, rtsp, mms, rtpm... media. That doesn't make usage of ssh or local port. Kodi will connect itself to the stream:</p>
 
-<p>This solution need to open port on your firewall. </p>
+<pre><code>idok -target=YOUR_KODI_IP scheme://url
+</code></pre>
 
-<p>By default, idok opens 8080 port (http-alternative), but you can specify other port using "-port" option.</p>
+<p>Where "scheme://url" can be "rtpm://...", "http://...", etc... </p>
 
-<p>At first, you must be sure that the port is opened. To open firewall port on you linux installation:</p>
+<p>For example, to open "Tears of Steel" movie:</p>
+
+<pre><code>idok -target=YOUR_KODI_IP http://ftp.halifax.rwth-aachen.de/blender/demo/movies/ToS/ToS-4k-1920.mov
+</code></pre>
+
+<p>Open Jamendo rock radio (creative commons musics):</p>
+
+<pre><code>idok -target=YOUR_KODI_IP https://streaming.jamendo.com/JamRock
+</code></pre>
+
+<h2>
+<a name="stream-your-local-media-through-http-default" class="anchor" href="#stream-your-local-media-through-http-default"><span class="octicon octicon-link"></span></a>Stream your local media through HTTP (default)</h2>
+
+<p>To open a media that resides on your computer:</p>
+
+<pre><code>idok -target=IP_OF_KODI_OR_XBMC /path/to/media.mp3
+</code></pre>
+
+<p>That command open port 8080 (http-alt) to stream media. If you want to use another port:</p>
+
+<pre><code>idok -port=1234 -target=IP_OF_KODI_OR_XBMC /path/to/media.mp3
+</code></pre>
+
+<p><strong>Note</strong></p>
+
+<p>This solution needs to open port on your firewall. </p>
+
+<p>You must be sure that the port is opened. On Linux, to open firewall port on you linux installation:</p>
 
 <pre><code>firewall-cmd --add-port=8080/tcp
 </code></pre>
@@ -121,20 +141,10 @@ The "idok.exe" file should be launched from command line (cmd command). </p>
 <pre><code>firewall-cmd --add-port=8080/tcp --permanent
 </code></pre>
 
-<p>Then, send media:</p>
-
-<pre><code>idok -target=IP_OF_KODI_OR_XBMC /path/to/media.mp3
-</code></pre>
-
-<p>If you've opened other port, you can set it. For example for port 1234:</p>
-
-<pre><code>idok -port=1234 -target=IP_OF_KODI_OR_XBMC /path/to/media.mp3
-</code></pre>
-
 <h2>
-<a name="ssh" class="anchor" href="#ssh"><span class="octicon octicon-link"></span></a>SSH</h2>
+<a name="stream-your-local-media-throught-ssh-tunnel" class="anchor" href="#stream-your-local-media-throught-ssh-tunnel"><span class="octicon octicon-link"></span></a>Stream your local media throught SSH Tunnel</h2>
 
-<p>The SSH way is the easier and more secured way. Easier because you don't have to open port on your computer and only the Kodi instance will be able to access your content.</p>
+<p>Idok can stream media through ssh tunnel. That way, you don't need to configure firewall.</p>
 
 <pre><code>idok -ssh -target=IP_OF_RASPBERRY /path/to/media.mp3
 </code></pre>
@@ -143,21 +153,50 @@ The "idok.exe" file should be launched from command line (cmd command). </p>
 
 <p>Pressing CTRL+C should stop media stream and exit program.</p>
 
+<p><strong>Note</strong></p>
+
 <p>With SSH, idok tries to use your ssh key pair to authenticate. If it fails, it will use login/password to auth. So, there are 2 possibilities:</p>
 
 <ul>
-<li>copy you public key to the kodi/xbmc host</li>
-<li>set -sshuser (default is "pi") and -sshpass options</li>
+<li>copy you public key to the kodi/xbmc host (with ssh-copy-id for example)</li>
+<li>set -sshuser (if user is not "pi") and -sshpass options (if password is not "raspberry")</li>
 </ul><p>To copy you key, type this command:</p>
 
 <pre><code>ssh-copy-id USER@KODI_HOST
 </code></pre>
 
-<p>Where USER is the ssh kodi user ("pi" on raspbmc) and KODI_HOST is ip or hotname of the kodi host. By default, raspbmc use "raspberry" as password.</p>
+<p>Where USER is the ssh kodi user ("pi" on raspbmc, "root" for openelec) and KODI_HOST is ip or hotname of the kodi host. By default, raspbmc use "raspberry" as password, "password" for openelec.</p>
 
 <p>Now, should should be able to stream media without the need of password.</p>
 
-<p><strong>Note: If you compiled yourself, remember to patch go.crypto/ssh package as explained above. Dropbear on raspbmc + crypto package are not compatibles without my patch</strong></p>
+<h1>
+<a name="some-other-streams-you-can-make" class="anchor" href="#some-other-streams-you-can-make"><span class="octicon octicon-link"></span></a>Some other streams you can make</h1>
+
+<p>The -stdin option is a cool new functionnality that "ianux" (an user on DLFP pages) asked me... I took this feature as a challenge ;) And it works !</p>
+
+<p>Since Idok can now use this option, I discovered that I'm able to make a lot of nice stream to my Kodi installation.</p>
+
+<h2>
+<a name="gstreamer---screencast-to-kodi" class="anchor" href="#gstreamer---screencast-to-kodi"><span class="octicon octicon-link"></span></a>Gstreamer - screencast to kodi</h2>
+
+<p>Gstreamer can be used to stream medias to stdout using "fdsink" or "filesink location=/dev/stdout". </p>
+
+<p>If you're using operating system that can be able to launch gstreamer pipelines, here is a nice "screencast stream":</p>
+
+<pre><code>gst-launch-1.0 -q ximagesrc remote=1 ! videoconvert  ! avenc_mpeg4 ! mpegtsmux ! filesink location=/dev/stdout | idok -stdin -ssh -target=YOUR_KODI_IP
+</code></pre>
+
+<p>Remove "remote=1" on "non fedora 20", this option is needed as far as I know on Fedora 20 (reported bug)</p>
+
+<h2>
+<a name="livestreamer---iss-station-from-space-from-ustream" class="anchor" href="#livestreamer---iss-station-from-space-from-ustream"><span class="octicon octicon-link"></span></a>livestreamer - ISS station from space from ustream</h2>
+
+<p>Livestreamer is a python tool that is able to fectch streams from some servers and is able to give an url. For some streams, it's impossible to get URL, but we can use "-O" option that dump stream to stdout. So...</p>
+
+<pre><code>livestreamer http://www.ustream.tv/channel/iss-hdev-payload 480p -Q -O | idok -stdin -ssh -target=YOUR_KODI_IP
+</code></pre>
+
+<p>That will launch the ISS live video from space (sometimes the image is black because ISS station is on the night side. Wait 5 minutes and you will see...)</p>
 
 <h1>
 <a name="install-from-source" class="anchor" href="#install-from-source"><span class="octicon octicon-link"></span></a>Install from source</h1>
@@ -185,28 +224,43 @@ cp idok ~/.local/bin
 
 <ul>
 <li>-target: kodi instance ip or hostname </li>
+<li>-targetport : Kodi jsonrpc port to connect, default is 80</li>
 <li>-login : xbmc or kodi login configured on web interface settings</li>
 <li>-password : xbmc or kodi password configured on web interface settings</li>
-<li>-ssh : If set, idok will dig ssh tunnel to stream content</li>
+<li>-ssh : If set, idok will dig ssh tunnel to stream content. Not used for youtube url or scheme url</li>
 <li>-sshuser : if you don't user "pi" user</li>
 <li>-sshpass : if you changed standard password of "pi" user</li>
 <li>-sshport : if you changed standard ssh port or to use other ssh server (default is 22)</li>
 <li>-port : local port for media stream if you don't use ssh tunneling, default is 8080</li>
+<li>-stdin: Read media from stdin and stream this to Kodi.</li>
 </ul><h1>
 <a name="todo" class="anchor" href="#todo"><span class="octicon octicon-link"></span></a>TODO</h1>
 
-<p>I should ask dropbear maintainer why the tunneling won't work. Installing openssh-server on raspbmc can be complicated for some users.</p>
-
-<p>Add kodi/xbmc port option (some users changed the default 80) </p>
-
-<h1>
+<ul>
+<li>Refactorisation to be more maintainable</li>
+<li>GUI (or not...)</li>
+<li>better lookup adresse for -target option</li>
+</ul><h1>
 <a name="changelog" class="anchor" href="#changelog"><span class="octicon octicon-link"></span></a>ChangeLog</h1>
 
 <ul>
 <li>
+<p>20140910-1</p>
+
+<ul>
+<li>Can now open streams through stdin (livestreamer, gstreamer, etc...) (thanks to "anxt" on gstreamer irc channel, thanks to ianux on DLFP that gives the idea)</li>
+<li>Fixes some needed options</li>
+<li>prepared to be refactored</li>
+<li>version number is now "modern" (thanks user "Baud" on DLFP)</li>
+<li>Fixes documentation</li>
+<li>Prepare examples</li>
+</ul>
+</li>
+<li>
 <p>0.2.6</p>
 
 <ul>
+<li>can now open http stream or video other that youtube</li>
 <li>fix issue #1 (reported at <a href="http://forum.xbmc.org/showthread.php?tid=203834">http://forum.xbmc.org/showthread.php?tid=203834</a>)</li>
 <li>Now, if idok wait reponse to check playing status</li>
 <li>Add DSA key managment</li>
