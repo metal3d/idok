@@ -42,23 +42,48 @@ Windows users may know that there is no graphical interface for the idok tool. M
 
 If you have troubles, please fill an issue. But keep in mind that I don't have any Windows or Mac OSX installation. 
 
-Stream your first media
-=======================
+Stream medias
+=============
 
 ## Youtube URL
 
-The simplier command is to open youtube url. Idok reoconize "youtu.be" and "www.youtube.com" hosts. Example:
+Open a youtube url is simple
 
-	idok -target=raspbmc.local "https://www.youtube.com/watch?v=o5snlP8Y5GY"
+	idok -target=YOUR_KODI_IP "https://www.youtube.com/watch?v=o5snlP8Y5GY"
 
-As next command examples, pressing CTRL+C will stop video stream, and the command exits when video ends.
+This will ask XBMC/Kodi to open this video. This doesn't stream video from your computer, so that's not use port opening and/or ssh tunnel.
 
 **Note: you must enable youtube addon on your kodi/XBMC installation.**
 
+## distant medias
 
-## HTTP (default)
+You can open http, rtsp, mms, rtpm... media. That doesn't make usage of ssh or local port. Kodi will connect itself to the stream:
 
-The HTTP way is not secured. While you're streaming to Kodi (or XBMC), the media can be accessed by other computer in your network. That's not a big problem while you're not streaming important information (restricted video). 
+	idok -target=YOUR_KODI_IP scheme://url
+
+Where "scheme://url" can be "rtpm://...", "http://...", etc... 
+
+For example, to open "Tears of Steel" movie:
+
+	idok -target=YOUR_KODI_IP http://ftp.halifax.rwth-aachen.de/blender/demo/movies/ToS/ToS-4k-1920.mov
+
+
+Open Jamendo rock radio (creative commons musics):
+
+	idok -target=YOUR_KODI_IP https://streaming.jamendo.com/JamRock
+
+
+## Stream your local media through HTTP (default)
+
+To open a media that resides on your computer:
+
+	idok -target=IP_OF_KODI_OR_XBMC /path/to/media.mp3
+
+That command open port 8080 (http-alt) to stream media. If you want to use another port:
+
+	idok -port=1234 -target=IP_OF_KODI_OR_XBMC /path/to/media.mp3
+
+**Note**
 
 This solution need to open port on your firewall. 
 
@@ -72,18 +97,9 @@ When you will reload firewall, or restart computer, the port will be closed. If 
 
 	firewall-cmd --add-port=8080/tcp --permanent
 
-Then, send media:
+## Stream your local media throught SSH Tunnel
 
-	idok -target=IP_OF_KODI_OR_XBMC /path/to/media.mp3
-
-If you've opened other port, you can set it. For example for port 1234:
-
-	idok -port=1234 -target=IP_OF_KODI_OR_XBMC /path/to/media.mp3
-
-
-## SSH
-
-The SSH way is the easier and more secured way. Easier because you don't have to open port on your computer and only the Kodi instance will be able to access your content.
+Idok can stream media through ssh tunnel. That way, you don't need to configure firewall.
 
 	idok -ssh -target=IP_OF_RASPBERRY /path/to/media.mp3
 
@@ -91,28 +107,30 @@ Your kodi should open the file.
 
 Pressing CTRL+C should stop media stream and exit program.
 
+**Note**
+
 With SSH, idok tries to use your ssh key pair to authenticate. If it fails, it will use login/password to auth. So, there are 2 possibilities:
 
-* copy you public key to the kodi/xbmc host
+* copy you public key to the kodi/xbmc host (with ssh-copy-id for example)
 * set -sshuser (default is "pi") and -sshpass options
 
 To copy you key, type this command:
 
 	ssh-copy-id USER@KODI_HOST
 
-Where USER is the ssh kodi user ("pi" on raspbmc) and KODI_HOST is ip or hotname of the kodi host. By default, raspbmc use "raspberry" as password.
+Where USER is the ssh kodi user ("pi" on raspbmc, "root" for openelec) and KODI_HOST is ip or hotname of the kodi host. By default, raspbmc use "raspberry" as password, "password" for openelec.
 
 Now, should should be able to stream media without the need of password.
-
-**Note: If you compiled yourself, remember to patch go.crypto/ssh package as explained above. Dropbear on raspbmc + crypto package are not compatibles without my patch**
-
 
 Some other streams you can make
 ===============================
 
-The -stdin option is a cool new functionnality that "ianux", an user that contact me on DLFP page, gave me as a challenge. Since Idok can now use this option, I discovered that I'm able to make a lot of nice stream to my Kodi installation.
+The -stdin option is a cool new functionnality that "ianux" (an user on DLFP pages) asked me... I took this feature as a challenge ;) And it works !
+
+Since Idok can now use this option, I discovered that I'm able to make a lot of nice stream to my Kodi installation.
 
 ## Gstreamer - screencast to kodi
+
 Gstreamer can be used to stream medias to stdout using "fdsink" or "filesink location=/dev/stdout". 
 
 If you're using operating system that can be able to launch gstreamer pipelines, here is a nice "screencast stream":
@@ -153,13 +171,15 @@ Options
 There are other options that may be usefull:
 
 * -target: kodi instance ip or hostname 
+* -targetport : Kodi jsonrpc port to connect, default is 80
 * -login : xbmc or kodi login configured on web interface settings
 * -password : xbmc or kodi password configured on web interface settings
-* -ssh : If set, idok will dig ssh tunnel to stream content
+* -ssh : If set, idok will dig ssh tunnel to stream content. Not used for youtube url or scheme url
 * -sshuser : if you don't user "pi" user
 * -sshpass : if you changed standard password of "pi" user
 * -sshport : if you changed standard ssh port or to use other ssh server (default is 22)
 * -port : local port for media stream if you don't use ssh tunneling, default is 8080
+* -stdin: Read media from stdin and stream this to Kodi.
 
 TODO
 ====
