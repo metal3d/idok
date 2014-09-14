@@ -190,6 +190,10 @@ TODO
 ChangeLog
 =========
 
+* 20140914-alpha-1
+  - Refactorisation to split in packages
+  - Move go.crypto package in local sources to not interfer with developper go standard packages
+
 * 20140910-1
   - Can now open streams through stdin (livestreamer, gstreamer, etc...) (thanks to "anxt" on gstreamer irc channel, thanks to ianux on DLFP that gives the idea)
   - Fixes some needed options
