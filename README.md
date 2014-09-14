@@ -133,7 +133,9 @@ Gstreamer can be used to stream medias to stdout using "fdsink" or "filesink loc
 
 If you're using operating system that can be able to launch gstreamer pipelines, here is a nice "screencast stream":
 
-	gst-launch-1.0 -q ximagesrc remote=1 ! videoconvert  ! avenc_mpeg4 ! mpegtsmux ! filesink location=/dev/stdout | idok -stdin -ssh -target=YOUR_KODI_IP
+	gst-launch-1.0 -q ximagesrc remote=1 ! videoconvert  ! avenc_mpeg4 ! \
+	mpegtsmux ! filesink location=/dev/stdout | \
+	idok -stdin -ssh -target=YOUR_KODI_IP
 
 Remove "remote=1" on "non fedora 20", this option is needed as far as I know on Fedora 20 (reported bug)
 
@@ -141,7 +143,9 @@ Remove "remote=1" on "non fedora 20", this option is needed as far as I know on 
 
 Livestreamer is a python tool that is able to fectch streams from some servers and is able to give an url. For some streams, it's impossible to get URL, but we can use "-O" option that dump stream to stdout. So...
 
-	livestreamer http://www.ustream.tv/channel/iss-hdev-payload 480p -Q -O | idok -stdin -ssh -target=YOUR_KODI_IP
+	livestreamer http://www.ustream.tv/channel/iss-hdev-payload \
+	480p -Q -O | \
+	idok -stdin -ssh -target=YOUR_KODI_IP
 
 That will launch the ISS live video from space (sometimes the image is black because ISS station is on the night side. Wait 5 minutes and you will see...)
 
@@ -149,7 +153,7 @@ That will launch the ISS live video from space (sometimes the image is black bec
 Install from source
 ===================
 
-**WARNING - Because there is a problem with dropbear ssh server on raspbmc, you should patch go.crypto/ssh package with the patched I made. See:
+**WARNING - Because there is a problem with dropbear ssh server on raspbmc, we are using go.crypto/ssh package with the patched I made. The package is, at this time, located in ./tunnel package. Soon, if bug is fixed, we will go back to the standard ssh package. See:
 https://code.google.com/p/go/issues/detail?id=8657**
 
 You can clone repository and compile source code yourself:
