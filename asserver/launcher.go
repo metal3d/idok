@@ -2,8 +2,8 @@
 package asserver
 
 import (
-	"../utils"
 	"fmt"
+	"github.com/metal3d/idok/utils"
 	"io"
 	"log"
 	"net"

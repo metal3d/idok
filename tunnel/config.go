@@ -1,7 +1,7 @@
 package tunnel
 
 import (
-	"./go.crypto/ssh"
+	"github.com/metal3d/idok/tunnel/go.crypto/ssh"
 	"log"
 	"os"
 	"os/user"

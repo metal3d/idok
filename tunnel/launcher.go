@@ -1,9 +1,9 @@
 package tunnel
 
 import (
-	"../utils"
-	"./go.crypto/ssh"
 	"fmt"
+	"github.com/metal3d/idok/tunnel/go.crypto/ssh"
+	"github.com/metal3d/idok/utils"
 	"io"
 	"log"
 	"math/rand"
