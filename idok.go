@@ -1,11 +1,11 @@
 package main
 
 import (
-	"./asserver"
-	"./tunnel"
-	"./utils"
 	"flag"
 	"fmt"
+	"github.com/metal3d/idok/asserver"
+	"github.com/metal3d/idok/tunnel"
+	"github.com/metal3d/idok/utils"
 	"log"
 	"os"
 	"path/filepath"
@@ -33,8 +33,11 @@ func main() {
 
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage of %s:\n", os.Args[0])
-		fmt.Fprintf(os.Stderr, "\n%s [options] mediafile|youtubeurl\n\n", os.Args[0])
-		fmt.Fprintf(os.Stderr, "Opening youtube urls dosen't open local or remote port.\n")
+		fmt.Fprintf(os.Stderr, "\n\t%s [options] mediafile|youtubeurl\n\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "Opening  URL dosen't open local or remote port. Your media center will fetch data itself.\n\n")
+		fmt.Fprintf(os.Stderr, "You may be able to stream stdout -> stdin:")
+		fmt.Fprintf(os.Stderr, "\n\t%s [options] -stdin < file\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "Or:\n\tcommand | %s [options] -stdin \n\n", os.Args[0])
 		fmt.Fprintf(os.Stderr, "Using ssh option is only managed for local files.\n")
 		fmt.Fprintf(os.Stderr, "Default mode is HTTP mode, it opens :8080 port on your host and send message to Kodi to open that port.\n")
 		fmt.Fprintf(os.Stderr, "You can use SSH with -ssh option, %s will try to use key pair authtification, then use -sshpass to try login/password auth. With -ssh, you should change -sshuser if your Kodi user is not \"pi\" (default on raspbmc)\n", os.Args[0])
