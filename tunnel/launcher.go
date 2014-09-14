@@ -2,7 +2,7 @@ package tunnel
 
 import (
 	"../utils"
-	"code.google.com/p/go.crypto/ssh"
+	"./go.crypto/ssh"
 	"fmt"
 	"io"
 	"log"

@@ -1,7 +1,7 @@
 package tunnel
 
 import (
-	"code.google.com/p/go.crypto/ssh"
+	"./go.crypto/ssh"
 	"log"
 	"os"
 	"os/user"
