@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	VERSION = "20140914-1"
+	VERSION = "v1-alpha1"
 )
 
 func main() {
