@@ -55,7 +55,7 @@ This will ask XBMC/Kodi to open this video. This doesn't stream video from your 
 
 **Note: you must enable youtube addon on your kodi/XBMC installation.**
 
-## distant medias
+## Distant medias (http, ftp, and so on...)
 
 You can open http, rtsp, mms, rtpm... media. That doesn't make usage of ssh or local port. Kodi will connect itself to the stream:
 
@@ -141,7 +141,7 @@ If you're using operating system that can be able to launch gstreamer pipelines,
 
 Remove "remote=1" on "non fedora 20", this option is needed as far as I know on Fedora 20 (reported bug)
 
-## livestreamer - ISS station from space from ustream
+## Livestreamer - ISS station from space from ustream
 
 Livestreamer is a python tool that is able to fectch streams from some servers and is able to give an url. For some streams, it's impossible to get URL, but we can use "-O" option that dump stream to stdout. So...
 
