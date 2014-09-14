@@ -65,7 +65,8 @@ Where "scheme://url" can be "rtpm://...", "http://...", etc...
 
 For example, to open "Tears of Steel" movie:
 
-	idok -target=YOUR_KODI_IP http://ftp.halifax.rwth-aachen.de/blender/demo/movies/ToS/ToS-4k-1920.mov
+	idok -target=YOUR_KODI_IP \
+	http://ftp.halifax.rwth-aachen.de/blender/demo/movies/ToS/ToS-4k-1920.mov
 
 
 Open Jamendo rock radio (creative commons musics):
@@ -81,7 +82,8 @@ To open a media that resides on your computer:
 
 That command open port 8080 (http-alt) to stream media. If you want to use another port:
 
-	idok -port=1234 -target=IP_OF_KODI_OR_XBMC /path/to/media.mp3
+	idok -port=1234 -target=IP_OF_KODI_OR_XBMC \
+	/path/to/media.mp3
 
 **Note**
 
