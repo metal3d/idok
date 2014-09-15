@@ -200,6 +200,7 @@ ChangeLog
   - Refactorisation to split in packages
   - Move go.crypto package in local sources to not interfer with developper go standard packages
   - Sorry but I change version system one more time... I will now use v1, v2, and so on. Alpha, Beta and RC will be named v2-alpha1, v2-alpha2, and so on.
+  - Now support configuration file, -conf-example print a configuration sample
 
 * 20140910-1
   - Can now open streams through stdin (livestreamer, gstreamer, etc...) (thanks to "anxt" on gstreamer irc channel, thanks to ianux on DLFP that gives the idea)
