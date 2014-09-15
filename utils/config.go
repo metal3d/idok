@@ -103,6 +103,9 @@ func LoadLocalConfig(filename string, config *Config) {
 		case "target":
 			config.Target = val[1]
 		case "targetport":
+			if val[1] == "" {
+				continue
+			}
 			port, err := strconv.Atoi(val[1])
 			if err != nil {
 				log.Fatal("Target port in config file should be integer")
@@ -123,6 +126,9 @@ func LoadLocalConfig(filename string, config *Config) {
 		case "sshpass":
 			config.Sshpassword = val[1]
 		case "sshport":
+			if val[1] == "" {
+				continue
+			}
 			port, err := strconv.Atoi(val[1])
 			if err != nil {
 				log.Fatal("SSH port in config file should be integer")
@@ -175,6 +181,6 @@ sshport =
 
 # force ssh usage (true or false)
 # (-ssh)
-ssh = true or false
+ssh = 
 `)
 }
