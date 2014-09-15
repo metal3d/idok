@@ -131,6 +131,69 @@ Where USER is the ssh kodi user ("pi" on raspbmc, "root" for openelec) and KODI_
 
 Now, should should be able to stream media without the need of password.
 
+Configuration File
+==================
+
+To not repeat options each time you want to run idok, you can create a configuation file to keep recurrent values.
+
+Idok will check if config files exists in that order:
+
+- ./idok.conf (current directory)
+- $HOME/.config/idok/idok.conf
+- $HOME/.local/etc/idok.conf
+- /etc/idok.conf
+
+If one of this file is found, the next will not be parsed.
+
+The command line option can always override configuration file values.
+
+To get an example of the configuration, type this command:
+
+	$ idok -conf-example
+	# blank value means default
+	#
+	# Idok checks if that file exists in that order:
+	# - ./idok.conf
+	# - $HOME/.config/idok/idok.conf
+	# - $HOME/.local/etc/idok.conf
+	# - /etc/idok.conf
+	#
+	# If option is given, it override the configuration file corresponding option
+	#
+	# IP or hostname of Kodi/XBMC
+	# (-target)
+	target = 
+
+	# port to connect jsonrpc
+	# (-targetport)
+	targetport = 
+
+	# Kodi/XBMC jsonrpc username and password
+	# (-login -password)
+	login = 
+	password = 
+
+	# SSH user/password (user is needed for ssh even if you sent keypair)
+	# (-sshuser -sshpass)
+	sshuser =
+	sshpass =
+
+	# if you changed ssh port from 22 to other
+	# (-sshport)
+	sshport = 
+
+	# force ssh usage (true or false)
+	# (-ssh)
+	ssh = 
+
+You can easilly prepare configuration:
+
+	$ mkdir -p ~/.config/idok/ && idok -conf-example > ~/.config/idok/idok.conf
+
+Then edit ~/.config/idok/idok.conf file to change values.
+
+That way, you will be able to launch idok without giving target, port, sshuser, and so on...
+
 Some other streams you can make
 ===============================
 
@@ -161,22 +224,18 @@ Livestreamer is a python tool that is able to fectch streams from some servers a
 That will launch the ISS live video from space (sometimes the image is black because ISS station is on the night side. Wait 5 minutes and you will see...)
 
 
-Install from source
-===================
+Develop with me ?
+=================
 
 **WARNING - Because there is a problem with dropbear ssh server on raspbmc, we are using go.crypto/ssh package with the patched I made. The package is, at this time, located in ./tunnel package. Soon, if bug is fixed, we will go back to the standard ssh package. See:
 https://code.google.com/p/go/issues/detail?id=8657**
 
-You can clone repository and compile source code yourself:
+To help me to improve idok, bug fixes or optimisations, please fork the repository then make pull-requests. 
 
-	git clone http://git.develipsum.com/metal3d/idok.git
-	cd idok
-	go build idok.go
+I'm not developping inside "master" branch. I'm using "devel" branch and, sometimes other named branch for certain tasks. For example, I was using "refacto" branch to rewrite the code in packages. 
 
-Then you can put binary in your PATH:
+If you want to help, please send me issues for bugs, fix translation, fix README file, I will help you to choose the right branch if needed and you name will be inserted in AUTHORS files as "contributors" or "developpers".
 
-	mkdir -p ~/.local/bin
-	cp idok ~/.local/bin
 
 Options
 =======
@@ -193,13 +252,14 @@ There are other options that may be usefull:
 * -sshport : if you changed standard ssh port or to use other ssh server (default is 22)
 * -port : local port for media stream if you don't use ssh tunneling, default is 8080
 * -stdin: Read media from stdin and stream this to Kodi.
+* -conf-example : Output a configuration file example
 
 TODO
 ====
 
-- Refactorisation to be more maintainable
 - GUI (or not...)
 - better lookup adresse for -target option
+- Launch a list of streams, playlist...
 
 
 ChangeLog
