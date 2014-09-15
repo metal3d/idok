@@ -15,6 +15,13 @@ Installation
 
 ## Install distribution
 
+### With "go get"
+If you've got a go installation and $GOPATH configured, you can install idok with "go get":
+
+	go get github.com/metal3d/idok
+
+### Easy install
+
 Linux users can use the auto-install:
 
 	bash <(wget https://github.com/metal3d/idok/releases/download/20140910-1/install-idok.sh -qO -)
@@ -26,6 +33,8 @@ Or with curl:
 Check that ~/.local/bin is in your PATH. Then try to call:
 
 	idok -h
+
+### Other builds
 
 If you want to get yourself the packed file for Linux, FreeBSD, MacOSX and Windows, here are the urls:
 
