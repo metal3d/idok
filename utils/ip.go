@@ -9,7 +9,7 @@ import (
 // return local ip that matches kodi network
 // ignoring loopback and other net interfaces
 func GetLocalInterfaceIP() (string, error) {
-	ips, _ := net.LookupIP(TARGETIP)
+	ips, _ := net.LookupIP(GlobalConfig.Target)
 	ifaces, err := net.Interfaces()
 	if err != nil {
 		log.Fatalf("Error while checking you interfaces: %v", err)

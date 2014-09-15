@@ -18,7 +18,7 @@ import (
 func SshForward(config *ssh.ClientConfig, file, dir string) {
 
 	// Setup sshClientConn (type *ssh.ClientConn)
-	sshClientConn, err := ssh.Dial("tcp", fmt.Sprintf("%s:%d", utils.TARGETIP, utils.SSHPORT), config)
+	sshClientConn, err := ssh.Dial("tcp", fmt.Sprintf("%s:%d", utils.GlobalConfig.Target, utils.GlobalConfig.Sshport), config)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -54,7 +54,7 @@ func SshForward(config *ssh.ClientConfig, file, dir string) {
 func SshForwardStdin(config *ssh.ClientConfig) {
 
 	// Setup sshClientConn (type *ssh.ClientConn)
-	sshClientConn, err := ssh.Dial("tcp", fmt.Sprintf("%s:%d", utils.TARGETIP, utils.SSHPORT), config)
+	sshClientConn, err := ssh.Dial("tcp", fmt.Sprintf("%s:%d", utils.GlobalConfig.Target, utils.GlobalConfig.Sshport), config)
 	if err != nil {
 		log.Fatal(err)
 	}

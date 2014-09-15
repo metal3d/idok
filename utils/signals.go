@@ -27,7 +27,7 @@ func OnQuit() {
 			}
 		}
 
-		http.Post(HOST, "application/json", bytes.NewBufferString(fmt.Sprintf(STOPBODY, playerid)))
+		http.Post(GlobalConfig.JsonRPC, "application/json", bytes.NewBufferString(fmt.Sprintf(STOPBODY, playerid)))
 		os.Exit(0)
 	}
 }

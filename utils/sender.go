@@ -28,7 +28,7 @@ func Send(scheme, host, file string, port int) {
 	file = u.String()
 	addr := fmt.Sprintf("%s://%s:%d/%s", scheme, host, port, file)
 
-	r, err := http.Post(HOST, "application/json", bytes.NewBufferString(fmt.Sprintf(BODY, addr)))
+	r, err := http.Post(GlobalConfig.JsonRPC, "application/json", bytes.NewBufferString(fmt.Sprintf(BODY, addr)))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -42,7 +42,7 @@ func Send(scheme, host, file string, port int) {
 func SendBasicStream(uri string, local bool) {
 	_body := fmt.Sprintf(BODY, uri)
 
-	r, err := http.Post(HOST, "application/json", bytes.NewBufferString(_body))
+	r, err := http.Post(GlobalConfig.JsonRPC, "application/json", bytes.NewBufferString(_body))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -60,7 +60,7 @@ func SendBasicStream(uri string, local bool) {
 // Ask to play youtube video
 func PlayYoutube(vidid string) {
 
-	r, err := http.Post(HOST, "application/json", bytes.NewBufferString(fmt.Sprintf(YOUTUBEAPI, vidid)))
+	r, err := http.Post(GlobalConfig.JsonRPC, "application/json", bytes.NewBufferString(fmt.Sprintf(YOUTUBEAPI, vidid)))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -89,7 +89,7 @@ func checkPlaying() {
 
 // return active player from XBMC
 func getActivePlayer() *itemresp {
-	r, _ := http.Post(HOST, "application/json", bytes.NewBufferString(GETPLAYERBODY))
+	r, _ := http.Post(GlobalConfig.JsonRPC, "application/json", bytes.NewBufferString(GETPLAYERBODY))
 	response, _ := ioutil.ReadAll(r.Body)
 	resp := &itemresp{}
 	resp.Result = make([]map[string]interface{}, 0)

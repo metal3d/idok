@@ -30,6 +30,7 @@ func main() {
 	version := flag.Bool("version", false, fmt.Sprintf("Print the current version (%s)", VERSION))
 	xbmcport := flag.Int("targetport", 80, "XBMC/Kodi jsonrpc port")
 	stdin := flag.Bool("stdin", false, "Read file from stdin")
+	confexample := flag.Bool("conf-example", false, "Write a configuration example")
 
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage of %s:\n", os.Args[0])
@@ -55,14 +56,35 @@ func main() {
 		os.Exit(0)
 	}
 
-	if *xbmcaddr == "" {
+	if *confexample {
+		utils.PrintExampleConfig()
+		os.Exit(0)
+	}
+
+	conf := &utils.Config{
+		Target:      *xbmcaddr,
+		Targetport:  *xbmcport,
+		Localport:   *port,
+		User:        *username,
+		Password:    *password,
+		Sshuser:     *sshuser,
+		Sshpassword: *sshpassword,
+		Sshport:     *sshport,
+		Ssh:         *viassh,
+	}
+
+	// check if conf file exists
+	if filename, found := utils.CheckLocalConfigFiles(); found {
+		utils.LoadLocalConfig(filename, conf)
+	}
+
+	if conf.Target == "" {
 		fmt.Println("\033[33mYou must provide the xbmc server address\033[0m")
 		flag.Usage()
 		os.Exit(1)
 	}
 
-	utils.SSHPORT = *sshport
-	utils.SetTarget(*xbmcaddr, *xbmcport, username, password)
+	utils.SetTarget(conf)
 
 	var dir, file string
 
@@ -95,7 +117,7 @@ func main() {
 
 	}
 
-	if *viassh {
+	if conf.Ssh {
 		config := tunnel.NewConfig(*sshuser, *sshpassword)
 		// serve ssh tunnel !
 		if !*stdin {

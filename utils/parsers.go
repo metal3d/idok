@@ -8,7 +8,10 @@ import (
 // check if argument is a youtube url
 func IsYoutubeURL(query string) (bool, string) {
 
-	u, _ := url.ParseRequestURI(query)
+	u, err := url.ParseRequestURI(query)
+	if err != nil {
+		return false, ""
+	}
 	if u.Host == "youtu.be" {
 		return true, u.Path[1:]
 	}
