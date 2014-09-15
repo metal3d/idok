@@ -33,8 +33,8 @@ func main() {
 	confexample := flag.Bool("conf-example", false, "Write a configuration example")
 
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage of %s:\n", os.Args[0])
-		fmt.Fprintf(os.Stderr, "\n\t%s [options] mediafile|youtubeurl\n\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "Usage: ")
+		fmt.Fprintf(os.Stderr, "%s [options] mediafile|youtubeurl|streamurl\n\n", os.Args[0])
 		fmt.Fprintf(os.Stderr, "Opening  URL dosen't open local or remote port. Your media center will fetch data itself.\n\n")
 		fmt.Fprintf(os.Stderr, "You may be able to stream stdout -> stdin:")
 		fmt.Fprintf(os.Stderr, "\n\t%s [options] -stdin < file\n", os.Args[0])
