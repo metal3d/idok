@@ -38,7 +38,7 @@ func HttpServe(file, dir string, port int) {
 }
 
 // Serve STDIN stream from a local port
-func HttpServeStdin(port int) {
+func TCPServeStdin(port int) {
 
 	localip, err := utils.GetLocalInterfaceIP()
 	log.Println(localip)

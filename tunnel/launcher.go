@@ -15,7 +15,7 @@ import (
 
 // SshForward digs a tunnel to xbmc/kodi, then open a port and bind socket to
 // the local http server
-func SshForward(config *ssh.ClientConfig, file, dir string) {
+func SshHTTPForward(config *ssh.ClientConfig, file, dir string) {
 
 	// Setup sshClientConn (type *ssh.ClientConn)
 	sshClientConn, err := ssh.Dial("tcp", fmt.Sprintf("%s:%d", utils.GlobalConfig.Target, utils.GlobalConfig.Sshport), config)

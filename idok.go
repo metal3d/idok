@@ -121,7 +121,7 @@ func main() {
 		config := tunnel.NewConfig(*sshuser, *sshpassword)
 		// serve ssh tunnel !
 		if !*stdin {
-			tunnel.SshForward(config, file, dir)
+			tunnel.SshHTTPForward(config, file, dir)
 		} else {
 			tunnel.SshForwardStdin(config)
 		}
@@ -130,7 +130,7 @@ func main() {
 		if !*stdin {
 			asserver.HttpServe(file, dir, *port)
 		} else {
-			asserver.HttpServeStdin(*port)
+			asserver.TCPServeStdin(*port)
 		}
 	}
 }
