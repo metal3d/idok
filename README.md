@@ -265,7 +265,10 @@ TODO
 ChangeLog
 =========
 
-* v1
+* v1-alpha2
+  - Fix some function names
+
+* v1-alpha1
   - Refactorisation to split in packages
   - Move go.crypto package in local sources to not interfer with developper go standard packages
   - Sorry but I change version system one more time... I will now use v1, v2, and so on. Alpha, Beta and RC will be named v2-alpha1, v2-alpha2, and so on.
