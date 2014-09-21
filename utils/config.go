@@ -180,7 +180,7 @@ sshpass =
 sshport = 
 
 # force ssh usage (true or false)
-# (-ssh)
+# (-ssh -nossh)
 ssh = 
 `)
 }

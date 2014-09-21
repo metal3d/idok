@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	VERSION = "v1-alpha1"
+	VERSION = "v1-alpha2"
 )
 
 func main() {
@@ -22,30 +22,18 @@ func main() {
 	xbmcaddr := flag.String("target", "", "xbmc/kodi ip (raspbmc address, ip or hostname)")
 	username := flag.String("login", "", "jsonrpc login (configured in xbmc settings)")
 	password := flag.String("password", "", "jsonrpc password (configured in xbmc settings)")
-	viassh := flag.Bool("ssh", false, "Use SSH Tunnelling (need ssh user and password)")
+	viassh := flag.Bool("ssh", false, "use SSH Tunnelling (need ssh user and password)")
+	nossh := flag.Bool("nossh", false, "force to not use SSH tunnel - usefull to override configuration file")
 	port := flag.Int("port", 8080, "local port (ignored if you use ssh option)")
 	sshuser := flag.String("sshuser", "pi", "ssh login")
 	sshpassword := flag.String("sshpass", "", "ssh password")
 	sshport := flag.Int("sshport", 22, "target ssh port")
 	version := flag.Bool("version", false, fmt.Sprintf("Print the current version (%s)", VERSION))
 	xbmcport := flag.Int("targetport", 80, "XBMC/Kodi jsonrpc port")
-	stdin := flag.Bool("stdin", false, "Read file from stdin")
-	confexample := flag.Bool("conf-example", false, "Write a configuration example")
+	stdin := flag.Bool("stdin", false, "read file from stdin to stream")
+	confexample := flag.Bool("conf-example", false, "print a configuration file example to STDOUT")
 
-	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage: ")
-		fmt.Fprintf(os.Stderr, "%s [options] mediafile|youtubeurl|streamurl\n\n", os.Args[0])
-		fmt.Fprintf(os.Stderr, "Opening  URL dosen't open local or remote port. Your media center will fetch data itself.\n\n")
-		fmt.Fprintf(os.Stderr, "You may be able to stream stdout -> stdin:")
-		fmt.Fprintf(os.Stderr, "\n\t%s [options] -stdin < file\n", os.Args[0])
-		fmt.Fprintf(os.Stderr, "Or:\n\tcommand | %s [options] -stdin \n\n", os.Args[0])
-		fmt.Fprintf(os.Stderr, "Using ssh option is only managed for local files.\n")
-		fmt.Fprintf(os.Stderr, "Default mode is HTTP mode, it opens :8080 port on your host and send message to Kodi to open that port.\n")
-		fmt.Fprintf(os.Stderr, "You can use SSH with -ssh option, %s will try to use key pair authtification, then use -sshpass to try login/password auth. With -ssh, you should change -sshuser if your Kodi user is not \"pi\" (default on raspbmc)\n", os.Args[0])
-		fmt.Fprintf(os.Stderr, "To be able to authenticate without password, use the command:\n\n\tssh-copy-id USER@KODI_HOST\n\nwhere USER is the Kodi user (pi) and KODI_HOST the ip or hostname of Kodi host.")
-		fmt.Fprintf(os.Stderr, "\n\nOptions:\n")
-		flag.PrintDefaults()
-	}
+	flag.Usage = utils.Usage
 
 	flag.Parse()
 
@@ -56,11 +44,13 @@ func main() {
 		os.Exit(0)
 	}
 
+	// If user asks to prints configuration file example, print it and exit
 	if *confexample {
 		utils.PrintExampleConfig()
 		os.Exit(0)
 	}
 
+	// Set new configuration from options
 	conf := &utils.Config{
 		Target:      *xbmcaddr,
 		Targetport:  *xbmcport,
@@ -73,7 +63,7 @@ func main() {
 		Ssh:         *viassh,
 	}
 
-	// check if conf file exists
+	// check if conf file exists and override options
 	if filename, found := utils.CheckLocalConfigFiles(); found {
 		utils.LoadLocalConfig(filename, conf)
 	}
@@ -117,7 +107,7 @@ func main() {
 
 	}
 
-	if conf.Ssh {
+	if conf.Ssh && !*nossh {
 		config := tunnel.NewConfig(*sshuser, *sshpassword)
 		// serve ssh tunnel !
 		if !*stdin {
