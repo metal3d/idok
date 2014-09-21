@@ -267,6 +267,7 @@ ChangeLog
 
 * v1-alpha2
   - Fix some function names
+  - Cleanup code and documentation
 
 * v1-alpha1
   - Refactorisation to split in packages
