@@ -201,17 +201,35 @@ The -stdin option is a cool new functionnality that "ianux" (an user on DLFP pag
 
 Since Idok can now use this option, I discovered that I'm able to make a lot of nice stream to my Kodi installation.
 
+## Direct encoding and stream
+
+You may have some files that won't be opened on Kodi. Sometimes because format is badly converted, or because you only have codecs on your local machine.
+
+To test format converstion, you can use "ffmpeg". Following example encode a badly encoded avi file to matroska:
+
+    ffmpeg -i BadFile.avi -f matroska - | idok -stdin
+	
+If you didn't made configuration file:
+
+	ffmpeg -i BadFile.avi -f matroska - | \
+	idok -target=YOUR_KODI_IP -stdin 
+	
+Last minus sign of ffmpeg means "stream to STDOUT". Idok will read from STDIN (piped) and stream data to Kodi/XBMC server (you may use -ssh -port as explained below).
+
 ## Gstreamer - screencast to kodi
 
 Gstreamer can be used to stream medias to stdout using "fdsink" or "filesink location=/dev/stdout". 
 
 If you're using operating system that can be able to launch gstreamer pipelines, here is a nice "screencast stream":
 
-	gst-launch-1.0 -q ximagesrc remote=1 ! videoconvert  ! avenc_mpeg4 ! \
+	gst-launch-1.0 -q ximagesrc remote=1 ! videoconvert ! \
+	avenc_mpeg4 ! \
 	mpegtsmux ! filesink location=/dev/stdout | \
 	idok -stdin -ssh -target=YOUR_KODI_IP
 
 Remove "remote=1" on "non fedora 20", this option is needed as far as I know on Fedora 20 (reported bug)
+
+"mpegtsmux" is made to stream mpeg content. This is the better plugin to stream with minimal latency AFAIK.
 
 ## Livestreamer - ISS station from space from ustream
 
