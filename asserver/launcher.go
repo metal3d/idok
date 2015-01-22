@@ -31,9 +31,6 @@ func HttpServe(file, dir string, port int) {
 	// send xbmc the file query
 	go utils.Send("http", localip, file, port)
 
-	// handle CTRL+C to stop
-	go utils.OnQuit()
-
 	http.ListenAndServe(fmt.Sprintf("0.0.0.0:%d", port), nil)
 }
 
@@ -58,6 +55,4 @@ func TCPServeStdin(port int) {
 	}
 	go io.Copy(c, os.Stdin)
 
-	// handle CTRL+C to stop
-	utils.OnQuit()
 }

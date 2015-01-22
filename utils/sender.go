@@ -8,7 +8,6 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"os"
 	"time"
 )
 
@@ -21,8 +20,8 @@ type itemresp struct {
 	Result  []map[string]interface{}
 }
 
-// begin to locally listen http to serve media
-func Send(scheme, host, file string, port int) {
+// Send the play command to Kodi/XBMC.
+func Send(scheme, host, file string, port int) <-chan int {
 
 	u := url.URL{Path: file}
 	file = u.String()
@@ -34,12 +33,13 @@ func Send(scheme, host, file string, port int) {
 	}
 	response, _ := ioutil.ReadAll(r.Body)
 	log.Println(string(response))
+
 	// and wait media end
-	go checkPlaying()
+	return checkPlaying()
 }
 
 // send basic stream...
-func SendBasicStream(uri string, local bool) {
+func SendBasicStream(uri string, local bool) <-chan int {
 	_body := fmt.Sprintf(BODY, uri)
 
 	r, err := http.Post(GlobalConfig.JsonRPC, "application/json", bytes.NewBufferString(_body))
@@ -52,13 +52,12 @@ func SendBasicStream(uri string, local bool) {
 	// handle CTRL+C to stop
 	go OnQuit()
 
-	// stay alive
-	c := make(chan int)
-	<-c
+	// and wait the end of media
+	return checkPlaying()
 }
 
-// Ask to play youtube video
-func PlayYoutube(vidid string) {
+// Ask to play youtube video.
+func PlayYoutube(vidid string) <-chan int {
 
 	r, err := http.Post(GlobalConfig.JsonRPC, "application/json", bytes.NewBufferString(fmt.Sprintf(YOUTUBEAPI, vidid)))
 	if err != nil {
@@ -70,24 +69,25 @@ func PlayYoutube(vidid string) {
 	// handle CTRL+C to stop
 	go OnQuit()
 
-	// stay alive
-	c := make(chan int)
-	<-c
+	return checkPlaying()
 }
 
-// test if media is playing, if not then quit
-func checkPlaying() {
+// test if media is playing, write 1 in returned chan when media has finished.
+func checkPlaying() <-chan int {
 	tick := time.Tick(TICK_CHECK * time.Second)
-	for _ = range tick {
-		resp := getActivePlayer()
-		if len(resp.Result) == 0 {
-			os.Exit(0)
+	c := make(chan int, 0)
+	go func() {
+		for _ = range tick {
+			resp := getActivePlayer()
+			if len(resp.Result) == 0 {
+				c <- 1
+			}
 		}
-	}
-
+	}()
+	return c
 }
 
-// return active player from XBMC
+// return active player from XBMC.
 func getActivePlayer() *itemresp {
 	r, _ := http.Post(GlobalConfig.JsonRPC, "application/json", bytes.NewBufferString(GETPLAYERBODY))
 	response, _ := ioutil.ReadAll(r.Body)
