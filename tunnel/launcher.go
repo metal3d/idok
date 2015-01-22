@@ -39,8 +39,6 @@ func SshHTTPForward(config *ssh.ClientConfig, file, dir string) {
 
 	// send xbmc the file query
 	go utils.Send("http", "localhost", file, dport)
-	// handle CTRL+C to stop
-	go utils.OnQuit()
 
 	// now serve file
 	fullpath := filepath.Join(dir, file)
@@ -83,7 +81,4 @@ func SshForwardStdin(config *ssh.ClientConfig) {
 		log.Fatal(err)
 	}
 	go io.Copy(c, os.Stdin)
-
-	// handle CTRL+C to stop
-	utils.OnQuit()
 }
