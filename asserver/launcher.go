@@ -31,7 +31,7 @@ func HttpServe(file, dir string, port int) {
 	// send xbmc the file query
 	go utils.Send("http", localip, file, port)
 
-	http.ListenAndServe(fmt.Sprintf("0.0.0.0:%d", port), nil)
+	log.Fatal(http.ListenAndServe(fmt.Sprintf("0.0.0.0:%d", port), nil));
 }
 
 // Serve STDIN stream from a local port
