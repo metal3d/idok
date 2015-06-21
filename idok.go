@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"time"
 
 	"github.com/metal3d/idok/asserver"
 	"github.com/metal3d/idok/tunnel"
@@ -76,13 +77,19 @@ func main() {
 		utils.LoadLocalConfig(filename, conf)
 	}
 
-	// do a version check if
-	// - release-check is set in flags
-	// - or -diable-release-check is false
-	// - or release-check is false in configuration
+	// Release check
 	if *checknew || conf.ReleaseCheck {
 		p := fmt.Sprintf("%s%c%s", os.TempDir(), os.PathSeparator, "idok_release_checked")
-		if _, err := os.Stat(p); os.IsNotExist(err) || *checknew { //must be forced by checknew
+		stat, err := os.Stat(p)
+		isold := false
+
+		// if file exists and is old, we must recheck
+		if err == nil && time.Since(stat.ModTime()) > time.Duration(24*3600*time.Second) {
+			isold = true
+		}
+
+		// if doesn't exists, or is old, or we have -check-release flag, do check
+		if os.IsNotExist(err) || isold || *checknew {
 			release, err := utils.CheckRelease()
 			if err != nil {
 				log.Println(err)
@@ -91,12 +98,15 @@ func main() {
 				log.Println("You can download it from ", release.Url)
 			}
 		}
+		// create the file
 		os.Create(p)
+
+		// quit if -check-release flag
 		if *checknew {
-			// quit if -check-release flag
 			os.Exit(0)
 		}
 	}
+
 	if conf.Target == "" {
 		fmt.Println("\033[33mYou must provide the xbmc server address\033[0m")
 		flag.Usage()
