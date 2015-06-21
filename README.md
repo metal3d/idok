@@ -29,7 +29,7 @@ If you've got a go installation and $GOPATH configured, you can install idok wit
 
 ### Easy install
 
-Linux users can use the auto-install:
+Linux, FreeBSD and OSX users can use the auto-install in a terminal:
 
 	bash <(wget https://goo.gl/imm9jP -qO -)
 
