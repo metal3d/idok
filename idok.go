@@ -23,20 +23,21 @@ func main() {
 
 	// flags
 	var (
-		xbmcaddr    = flag.String("target", "", "xbmc/kodi ip (raspbmc address, ip or hostname)")
-		username    = flag.String("login", "", "jsonrpc login (configured in xbmc settings)")
-		password    = flag.String("password", "", "jsonrpc password (configured in xbmc settings)")
-		viassh      = flag.Bool("ssh", false, "use SSH Tunnelling (need ssh user and password)")
-		nossh       = flag.Bool("nossh", false, "force to not use SSH tunnel - usefull to override configuration file")
-		port        = flag.Int("port", 8080, "local port (ignored if you use ssh option)")
-		sshuser     = flag.String("sshuser", "pi", "ssh login")
-		sshpassword = flag.String("sshpass", "", "ssh password")
-		sshport     = flag.Int("sshport", 22, "target ssh port")
-		version     = flag.Bool("version", false, fmt.Sprintf("Print the current version (%s)", VERSION))
-		xbmcport    = flag.Int("targetport", 80, "XBMC/Kodi jsonrpc port")
-		stdin       = flag.Bool("stdin", false, "read file from stdin to stream")
-		confexample = flag.Bool("conf-example", false, "print a configuration file example to STDOUT")
-		checknew    = flag.Bool("check-release", false, "check if a new release is ready")
+		xbmcaddr     = flag.String("target", "", "xbmc/kodi ip (raspbmc address, ip or hostname)")
+		username     = flag.String("login", "", "jsonrpc login (configured in xbmc settings)")
+		password     = flag.String("password", "", "jsonrpc password (configured in xbmc settings)")
+		viassh       = flag.Bool("ssh", false, "use SSH Tunnelling (need ssh user and password)")
+		nossh        = flag.Bool("nossh", false, "force to not use SSH tunnel - usefull to override configuration file")
+		port         = flag.Int("port", 8080, "local port (ignored if you use ssh option)")
+		sshuser      = flag.String("sshuser", "pi", "ssh login")
+		sshpassword  = flag.String("sshpass", "", "ssh password")
+		sshport      = flag.Int("sshport", 22, "target ssh port")
+		version      = flag.Bool("version", false, fmt.Sprintf("Print the current version (%s)", VERSION))
+		xbmcport     = flag.Int("targetport", 80, "XBMC/Kodi jsonrpc port")
+		stdin        = flag.Bool("stdin", false, "read file from stdin to stream")
+		confexample  = flag.Bool("conf-example", false, "print a configuration file example to STDOUT")
+		disablecheck = flag.Bool("disable-check-release", false, "disable release check")
+		checknew     = flag.Bool("check-release", false, "check for new release")
 	)
 
 	flag.Usage = utils.Usage
@@ -56,15 +57,6 @@ func main() {
 		os.Exit(0)
 	}
 
-	if *checknew {
-		release := utils.CheckRelease()
-		if release.TagName != VERSION {
-			log.Println("A new release is available on github: ", release.TagName)
-			log.Println("You can download it from ", release.Url)
-		}
-		os.Exit(0)
-	}
-
 	// Set new configuration from options
 	conf := &utils.Config{
 		Target:       *xbmcaddr,
@@ -76,7 +68,7 @@ func main() {
 		Sshpassword:  *sshpassword,
 		Sshport:      *sshport,
 		Ssh:          *viassh,
-		ReleaseCheck: *checknew,
+		ReleaseCheck: *disablecheck,
 	}
 
 	// check if conf file exists and override options
@@ -84,6 +76,27 @@ func main() {
 		utils.LoadLocalConfig(filename, conf)
 	}
 
+	// do a version check if
+	// - release-check is set in flags
+	// - or -diable-release-check is false
+	// - or release-check is false in configuration
+	if *checknew || conf.ReleaseCheck {
+		p := fmt.Sprintf("%s%c%s", os.TempDir(), os.PathSeparator, "idok_release_checked")
+		if _, err := os.Stat(p); os.IsNotExist(err) || *checknew { //must be forced by checknew
+			release, err := utils.CheckRelease()
+			if err != nil {
+				log.Println(err)
+			} else if release.TagName != VERSION {
+				log.Println("A new release is available on github: ", release.TagName)
+				log.Println("You can download it from ", release.Url)
+			}
+		}
+		os.Create(p)
+		if *checknew {
+			// quit if -check-release flag
+			os.Exit(0)
+		}
+	}
 	if conf.Target == "" {
 		fmt.Println("\033[33mYou must provide the xbmc server address\033[0m")
 		flag.Usage()
