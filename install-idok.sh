@@ -39,17 +39,10 @@ ARCH=$(uname -i)
 CMD="wget -q -O -"
 [ -x $(which curl) ] && CMD="curl -# -X GET -L"
 
-URL=$($CMD "https://api.github.com/repos/metal3d/idok/releases" 2>/dev/null | awk -NF":" '
-    BEGIN{
-        ok=0
-    }
+URL=$($CMD "https://api.github.com/repos/metal3d/idok/releases/latest" 2>/dev/null | awk -NF":" '
     {
-        if (/"prerelease"\s*:\s*false/) {
-            ok=1
-        }
-        if (/browser_download_url/ && /idok-'$ARCH'/ && ok == 1){
+        if (/browser_download_url/ && /idok-'$ARCH'/){
             print $2 ":" $3
-            exit 0
         }
     }
 ')
