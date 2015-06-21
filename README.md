@@ -83,9 +83,14 @@ To open a media that resides on your computer:
 
 	idok -target=IP_OF_KODI_OR_XBMC /path/to/media.mp3
 
-That command open port 8080 (http-alt) to stream media. If you want to use another port:
+That command open LOCAL port 8080 (http-alt) to stream media. If you want to use another port:
 
 	idok -port=1234 -target=IP_OF_KODI_OR_XBMC \
+	/path/to/media.mp3
+
+If your kodi installation use another port for jsonrpc, you may change "target port":
+
+	idok -target-port=80 -target=IP_OF_KODI_OR_XBMC \
 	/path/to/media.mp3
 
 **Note**
@@ -254,17 +259,23 @@ Options
 
 There are other options that may be usefull:
 
-* -target: kodi instance ip or hostname 
-* -targetport : Kodi jsonrpc port to connect, default is 80
-* -login : xbmc or kodi login configured on web interface settings
-* -password : xbmc or kodi password configured on web interface settings
-* -ssh : If set, idok will dig ssh tunnel to stream content. Not used for youtube url or scheme url
-* -sshuser : if you don't user "pi" user
-* -sshpass : if you changed standard password of "pi" user
-* -sshport : if you changed standard ssh port or to use other ssh server (default is 22)
-* -port : local port for media stream if you don't use ssh tunneling, default is 8080
-* -stdin: Read media from stdin and stream this to Kodi.
-* -conf-example : Output a configuration file example
+* -check-release=false: check for new release
+* -conf-example=false: print a configuration file example to STDOUT
+* -disable-check-release=false: disable release check
+* -login="": jsonrpc login (configured in xbmc settings)
+* -nossh=false: force to not use SSH tunnel - usefull to override configuration file
+* -password="": jsonrpc password (configured in xbmc settings)
+* -port=8080: local port (ignored if you use ssh option)
+* -ssh=false: use SSH Tunnelling (need ssh user and password)
+* -sshpass="": ssh password
+* -sshport=22: target ssh port
+* -sshuser="pi": ssh login
+* -stdin=false: read file from stdin to stream
+* -target="": xbmc/kodi ip (raspbmc address, ip or hostname)
+* -targetport=80: XBMC/Kodi jsonrpc port
+* -version=false: Print the current version
+
+
 
 TODO
 ====
