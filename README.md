@@ -1,3 +1,9 @@
+Idok
+====
+
+[![status](https://sourcegraph.com/api/repos/github.com/metal3d/idok/.badges/status.svg)](https://sourcegraph.com/github.com/metal3d/idok)
+[![library users](https://sourcegraph.com/api/repos/github.com/metal3d/idok/.badges/library-users.svg)](https://sourcegraph.com/github.com/metal3d/idok)
+
 What is it ?
 ============
 
