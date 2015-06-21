@@ -16,6 +16,7 @@ Installation
 ## Install distribution
 
 ### With "go get"
+
 If you've got a go installation and $GOPATH configured, you can install idok with "go get":
 
 	go get github.com/metal3d/idok
@@ -24,28 +25,21 @@ If you've got a go installation and $GOPATH configured, you can install idok wit
 
 Linux users can use the auto-install:
 
-	bash <(wget https://github.com/metal3d/idok/releases/download/20140910-1/install-idok.sh -qO -)
+	bash <(wget https://goo.gl/imm9jP -qO -)
 
 Or with curl:
 
-	bash <(curl -L https://github.com/metal3d/idok/releases/download/20140910-1/install-idok.sh)
+	bash <(curl -L https://goo.gl/imm9jP)
 
 Check that ~/.local/bin is in your PATH. Then try to call:
 
 	idok -h
 
-### Other builds
+### Other install method
 
 If you want to get yourself the packed file for Linux, FreeBSD, MacOSX and Windows, here are the urls:
 
-* [Linux x64](https://github.com/metal3d/idok/releases/download/20140910-1/idok-x86_64.gz)
-* [Linux i686](https://github.com/metal3d/idok/releases/download/20140910-1/idok-i686.gz)
-* [FreeBSD 64 bits](https://github.com/metal3d/idok/releases/download/20140910-1/idok-freebsd64.gz)
-* [FreeBSD 32 bits](https://github.com/metal3d/idok/releases/download/20140910-1/idok-freebsd32.gz)
-* [MacOSX 64 bits](https://github.com/metal3d/idok/releases/download/20140910-1/idok-darwin.gz)
-* [Windows 64 bits](https://github.com/metal3d/idok/releases/download/20140910-1/idok.zip)
-
-(I need help for Mac because I don't have one and cannot be sure of how to install the command at the right path...)
+Visit the release page: https://github.com/metal3d/idok/releases and pick the version for you OS. Then unpack the binary and put it in your PATH.
 
 Windows users may know that there is no graphical interface for the idok tool. Maybe one day...
 
