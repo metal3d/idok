@@ -3,35 +3,41 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/metal3d/idok/asserver"
-	"github.com/metal3d/idok/tunnel"
-	"github.com/metal3d/idok/utils"
 	"log"
 	"os"
 	"path/filepath"
 	"runtime"
+
+	"github.com/metal3d/idok/asserver"
+	"github.com/metal3d/idok/tunnel"
+	"github.com/metal3d/idok/utils"
 )
 
-const (
-	VERSION = "v1-alpha2"
+// Current VERSION - should be var and not const to be
+// set at compile time (see Makefile OPTS)
+var (
+	VERSION = "notversionned"
 )
 
 func main() {
 
 	// flags
-	xbmcaddr := flag.String("target", "", "xbmc/kodi ip (raspbmc address, ip or hostname)")
-	username := flag.String("login", "", "jsonrpc login (configured in xbmc settings)")
-	password := flag.String("password", "", "jsonrpc password (configured in xbmc settings)")
-	viassh := flag.Bool("ssh", false, "use SSH Tunnelling (need ssh user and password)")
-	nossh := flag.Bool("nossh", false, "force to not use SSH tunnel - usefull to override configuration file")
-	port := flag.Int("port", 8080, "local port (ignored if you use ssh option)")
-	sshuser := flag.String("sshuser", "pi", "ssh login")
-	sshpassword := flag.String("sshpass", "", "ssh password")
-	sshport := flag.Int("sshport", 22, "target ssh port")
-	version := flag.Bool("version", false, fmt.Sprintf("Print the current version (%s)", VERSION))
-	xbmcport := flag.Int("targetport", 80, "XBMC/Kodi jsonrpc port")
-	stdin := flag.Bool("stdin", false, "read file from stdin to stream")
-	confexample := flag.Bool("conf-example", false, "print a configuration file example to STDOUT")
+	var (
+		xbmcaddr    = flag.String("target", "", "xbmc/kodi ip (raspbmc address, ip or hostname)")
+		username    = flag.String("login", "", "jsonrpc login (configured in xbmc settings)")
+		password    = flag.String("password", "", "jsonrpc password (configured in xbmc settings)")
+		viassh      = flag.Bool("ssh", false, "use SSH Tunnelling (need ssh user and password)")
+		nossh       = flag.Bool("nossh", false, "force to not use SSH tunnel - usefull to override configuration file")
+		port        = flag.Int("port", 8080, "local port (ignored if you use ssh option)")
+		sshuser     = flag.String("sshuser", "pi", "ssh login")
+		sshpassword = flag.String("sshpass", "", "ssh password")
+		sshport     = flag.Int("sshport", 22, "target ssh port")
+		version     = flag.Bool("version", false, fmt.Sprintf("Print the current version (%s)", VERSION))
+		xbmcport    = flag.Int("targetport", 80, "XBMC/Kodi jsonrpc port")
+		stdin       = flag.Bool("stdin", false, "read file from stdin to stream")
+		confexample = flag.Bool("conf-example", false, "print a configuration file example to STDOUT")
+		checknew    = flag.Bool("check-release", false, "check if a new release is ready")
+	)
 
 	flag.Usage = utils.Usage
 
@@ -50,17 +56,27 @@ func main() {
 		os.Exit(0)
 	}
 
+	if *checknew {
+		release := utils.CheckRelease()
+		if release.TagName != VERSION {
+			log.Println("A new release is available on github: ", release.TagName)
+			log.Println("You can download it from ", release.Url)
+		}
+		os.Exit(0)
+	}
+
 	// Set new configuration from options
 	conf := &utils.Config{
-		Target:      *xbmcaddr,
-		Targetport:  *xbmcport,
-		Localport:   *port,
-		User:        *username,
-		Password:    *password,
-		Sshuser:     *sshuser,
-		Sshpassword: *sshpassword,
-		Sshport:     *sshport,
-		Ssh:         *viassh,
+		Target:       *xbmcaddr,
+		Targetport:   *xbmcport,
+		Localport:    *port,
+		User:         *username,
+		Password:     *password,
+		Sshuser:      *sshuser,
+		Sshpassword:  *sshpassword,
+		Sshport:      *sshport,
+		Ssh:          *viassh,
+		ReleaseCheck: *checknew,
 	}
 
 	// check if conf file exists and override options

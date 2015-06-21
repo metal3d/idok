@@ -40,6 +40,9 @@ type Config struct {
 
 	// Use SSH to stream
 	Ssh bool
+
+	// Check for new release
+	ReleaseCheck bool
 }
 
 var GlobalConfig *Config
@@ -138,6 +141,10 @@ func LoadLocalConfig(filename string, config *Config) {
 			if val[1] == "true" {
 				config.Ssh = true
 			}
+		case "release-check":
+			if val[1] == "false" {
+				config.ReleaseCheck = false
+			}
 		default:
 			log.Fatalf("Bad Key in configuration file: %s\n", val)
 		}
@@ -182,5 +189,8 @@ sshport =
 # force ssh usage (true or false)
 # (-ssh -nossh)
 ssh = 
+
+# check for new release
+release-check = false
 `)
 }
