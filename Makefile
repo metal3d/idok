@@ -9,7 +9,6 @@ all: _prepare linux32 linux64 darwin freebsd64 freebsd32 windows pack
 
 _prepare: clean
 	mkdir dist
-	sed 's/@VERSION@/$(VERSION)/' install-idok.sh > dist/install-idok.sh
 
 darwin:
 	GOOS=darwin go build $(OPTS) -o idok-darwin idok.go

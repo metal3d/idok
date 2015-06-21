@@ -1,11 +1,10 @@
 #!/bin/bash
 
-VERSION="@VERSION@"
 echo "This will install idok on your computer."
 echo "Select installation type"
 
-
-
+DIR="~/.local/bin"
+PREFIXCMD="bash -c"
 select choice in \
 	"Install for the current user $USER" \
 	"Install for all user in /usr/local/bin (will use sudo)" \
@@ -29,22 +28,33 @@ done
 
 ARCH=$(uname -i)
 
-[ $ARCH == "amd64" ] && ARCH="x86_64"
-[ $ARCH == "ia64" ] && ARCH="x86_64"
-[ $ARCH == "ia32" ] && ARCH="i686"
-[ $ARCH == "i386" ] && ARCH="i686"
+[ $ARCH == "amd64" ]                                 && ARCH="x86_64"
+[ $ARCH == "ia64" ]                                  && ARCH="x86_64"
+[ $ARCH == "ia32" ]                                  && ARCH="i686"
+[ $ARCH == "i386" ]                                  && ARCH="i686"
+[ x"$OSTYPE" == x"darwin" ]                          && ARCH="darwin"
+[ x"$OSTYPE" == x"freebsd" ] && [ $ARCH == "i686" ]  && ARCH="freebsd32"
+[ x"$OSTYPE" == x"freebsd" ] && [$ARCH == "x86_64" ] && ARCH="freebsd64"
 
-URL="https://github.com/metal3d/idok/releases/download/$VERSION/idok-$ARCH.gz"
-GET=$(which curl)
-if [ $? == 0 ]; then
-	CMD="curl -L $URL"
-else
-	CMD="wget $URL -qO -"
-fi
+CMD="wget -q -O -"
+[ -x $(which curl) ] && CMD="curl -# -X GET -L"
 
-echo $URL
+URL=$($CMD "https://api.github.com/repos/metal3d/idok/releases" 2>/dev/null | awk -NF":" '
+    BEGIN{
+        ok=0
+    }
+    {
+        if (/"prerelease"\s*:\s*false/) {
+            ok=1
+        }
+        if (/browser_download_url/ && /idok-'$ARCH'/ && ok == 1){
+            print $2 ":" $3
+            exit 0
+        }
+    }
+')
 
-COMMAND="$CMD | gunzip -c > $DIR/idok"
+COMMAND="$CMD $URL | gunzip -c > $DIR/idok"
 bash -c "$PREFIXCMD \"$COMMAND\""
 sleep 1
 bash -c "$PREFIXCMD \"chmod +x $DIR/idok\""
