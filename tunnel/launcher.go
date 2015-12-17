@@ -80,5 +80,5 @@ func SshForwardStdin(config *ssh.ClientConfig) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	go io.Copy(c, os.Stdin)
+	io.Copy(c, os.Stdin)
 }

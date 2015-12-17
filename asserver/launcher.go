@@ -53,6 +53,5 @@ func TCPServeStdin(port int) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	go io.Copy(c, os.Stdin)
-
+	io.Copy(c, os.Stdin)
 }
