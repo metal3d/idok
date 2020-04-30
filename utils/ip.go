@@ -15,7 +15,6 @@ func GetLocalInterfaceIP() (string, error) {
 		log.Fatalf("Error while checking you interfaces: %v", err)
 	}
 	for _, ip := range ips {
-		mask := ip.DefaultMask()
 		for _, iface := range ifaces {
 			if iface.Flags&net.FlagLoopback != 0 {
 				continue
@@ -23,9 +22,11 @@ func GetLocalInterfaceIP() (string, error) {
 
 			addrs, _ := iface.Addrs()
 			for _, addr := range addrs {
+				_, subnet, _ := net.ParseCIDR(addr.String())
 				switch v := addr.(type) {
 				case *net.IPNet:
-					if v.Mask.String() == mask.String() {
+
+					if subnet.Contains(ip) {
 						return v.IP.String(), nil
 					}
 				}
